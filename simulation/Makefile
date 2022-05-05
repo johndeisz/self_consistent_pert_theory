@@ -1,8 +1,8 @@
 SHELL=/bin/sh
 
 CC=gfortran -O3
-# MPICC=mpif90 -O3
-MPICC=/usr/lib64/mpich/bin/mpif90 -O3 -mcmodel=medium -fallow-argument-mismatch
+MPICC=mpif90 -O3
+# MPICC=/usr/lib64/mpich/bin/mpif90 -O3 -mcmodel=medium -fallow-argument-mismatch
 LIBRARIES= -lfftw3 -lblas -llapack 
 
 ifdef SYS
@@ -11,7 +11,7 @@ endif
 
 OBJECTS_COMMON = \
 	constants.o \
- 	main.o \
+ 	main.o
 #	bare_dispersion.o \
 #	h0.o \
 #	init_environ.o \
