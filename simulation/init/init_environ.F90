@@ -63,15 +63,6 @@ subroutine init_environ(rank, size, starttime)
 
   endif
 
-  if (rank .eq. 0) then
-#ifdef SINGLE_PREC
-     write(6,*) 'Compiled for SINGLE PRECISION.'
-#else
-     write(6,*) 'Compiled for DOUBLE PRECISION.'
-#endif /* SINGLE_PREC */
-
-  endif
-
   return
 end subroutine init_environ
 	 

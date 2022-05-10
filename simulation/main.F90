@@ -13,7 +13,7 @@ program multiband_flex_dca
 
 #include "main_defs.F90"
 
-!!$  call init_environ(rank, size, start_time)
+  call init_environ(rank, size, start_time)
 
   ! Gather all the data from the input file
 ! call readin(t, flux, prfld, h, target_density, density_tol, mu, uu,
@@ -433,17 +433,16 @@ program multiband_flex_dca
 !!$  endif
 !!$
 !!$
-!!$  call cpu_time(end_time)
-!!$
-!!$  if (rank .eq. 0) then
-!!$     write(6,*)
-!!$     write(6,*) 'Execution time = ', end_time-start_time, '
-  !!seconds.'
-!!$  endif
-!!$
-!!$#ifdef USE_MPI
-!!$  call MPI_Finalize(ierr)
-!!$#endif /* USE_MPI */
+  call cpu_time(end_time)
+
+  if (rank .eq. 0) then
+     write(6,*)
+     write(6,*) 'Execution time = ', end_time-start_time, ' seconds.'
+  endif
+
+#ifdef USE_MPI
+  call MPI_Finalize(ierr)
+#endif /* USE_MPI */
 
 500 format('xx')
 600 format('xx ', I5, '  ', f5.3,'  ')

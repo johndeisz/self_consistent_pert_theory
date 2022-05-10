@@ -11,10 +11,10 @@ endif
 
 OBJECTS_COMMON = \
 	constants.o \
- 	main.o
+ 	main.o \
+	init_environ.o 
 #	bare_dispersion.o \
 #	h0.o \
-#	init_environ.o \
 #	readin.o \
 #	fft_3D_lattice.o \
 #	init_sigma1.o \
@@ -80,51 +80,43 @@ OBJECTS_THIRD = \
 #	transform_chi.o \
 #	t_transform.o \
 
-ifeq ($(PREC),single)
-        prec_flag = -DSINGLE_PREC         
-	prec_tag = single
-else
-        prec_flag = -DDOUBLE_PREC
-        prec_tag = double
-endif
-
-flex : defines = -DSECOND_ORDER -DTHIRD_ORDER -DFLEX $(prec_flag) 
+flex : defines = -DSECOND_ORDER -DTHIRD_ORDER -DFLEX  
 flex : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
 flex : $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-	$(CC) -o flex-$(prec_tag) $(OBJECTS) $(LIBRARIES) 
+	$(CC) -o flex $(OBJECTS) $(LIBRARIES) 
 
-flex-mpi : defines = -DSECOND_ORDER -DTHIRD_ORDER -DFLEX -DUSE_MPI $(prec_flag) 
+flex-mpi : defines = -DSECOND_ORDER -DTHIRD_ORDER -DFLEX -DUSE_MPI  
 flex-mpi : CC=$(MPICC)
 flex-mpi : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
 flex-mpi : $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-	$(CC) -o flex-mpi-$(prec_tag) $(OBJECTS) $(LIBRARIES)
+	$(CC) -o flex-mpi $(OBJECTS) $(LIBRARIES)
 
-3rd-order : defines = -DSECOND_ORDER -DTHIRD_ORDER $(prec_flag) 
+3rd-order : defines = -DSECOND_ORDER -DTHIRD_ORDER  
 3rd-order : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
 3rd-order :  $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-	$(CC) -o 3rd-order-$(prec_tag) $(OBJECTS) $(LIBRARIES) 
+	$(CC) -o 3rd-order $(OBJECTS) $(LIBRARIES) 
 
-3rd-order-mpi : defines = -DSECOND_ORDER -DTHIRD_ORDER -DUSE_MPI $(prec_flag) 
+3rd-order-mpi : defines = -DSECOND_ORDER -DTHIRD_ORDER -DUSE_MPI  
 3rd-order-mpi : CC=$(MPICC)
 3rd-order-mpi : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
 3rd-order-mpi :  $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-	$(MPICC) -o 3rd-order-mpi-$(prec_tag) $(OBJECTS) $(LIBRARIES)
+	$(MPICC) -o 3rd-order-mpi $(OBJECTS) $(LIBRARIES)
 
-2nd-order : defines = -DSECOND_ORDER $(prec_flag) 
+2nd-order : defines = -DSECOND_ORDER  
 2nd-order : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND)
 2nd-order :  $(OBJECTS_COMMON) $(OBJECTS_SECOND)
-	$(CC) -o 2nd-order-$(prec_tag) $(OBJECTS) $(LIBRARIES) 
+	$(CC) -o 2nd-order $(OBJECTS) $(LIBRARIES) 
 
-2nd-order-mpi : defines = -DSECOND_ORDER -DUSE_MPI $(prec_flag) 
+2nd-order-mpi : defines = -DSECOND_ORDER -DUSE_MPI  
 2nd-order-mpi : CC=$(MPICC)
 2nd-order-mpi : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND)
 2nd-order-mpi :  $(OBJECTS_COMMON) $(OBJECTS_SECOND)
-	$(MPICC) -o 2nd-order-mpi-$(prec_tag) $(OBJECTS) $(LIBRARIES)
+	$(MPICC) -o 2nd-order-mpi $(OBJECTS) $(LIBRARIES)
 
-1st-order : defines = $(prec_flag) 
+1st-order : defines =  
 1st-order : OBJECTS = $(OBJECTS_COMMON) 
 1st-order : $(OBJECTS_COMMON)
-	$(CC) -o 1st-order-$(prec_tag) $(OBJECTS) $(LIBRARIES)
+	$(CC) -o 1st-order $(OBJECTS) $(LIBRARIES)
 
 constants.o : constants.F90
 	$(CC) -c constants.F90 $(defines)

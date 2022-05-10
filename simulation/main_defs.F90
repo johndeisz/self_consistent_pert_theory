@@ -1,8 +1,8 @@
-  ! MPI variables
-! INTEGER rank, size
-  ! Timing variables
-! Real start_time, end_time
-! Real last_it_time, this_it_time
+! MPI variables
+INTEGER rank, size
+! Timing variables
+Real start_time, end_time
+Real last_it_time, this_it_time
 
   ! Parameters read from input file
 ! REAL t
@@ -105,5 +105,5 @@
 #endif /* SECOND_ORDER */
 
 #ifdef USE_MPI
-! INTEGER ierr
+  INTEGER ierr
 #endif /* USE_MPI */
