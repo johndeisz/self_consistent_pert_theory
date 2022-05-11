@@ -12,10 +12,10 @@ endif
 OBJECTS_COMMON = \
 	constants.o \
  	main.o \
-	init_environ.o 
+	init_environ.o \
+	readin.o 
 #	bare_dispersion.o \
 #	h0.o \
-#	readin.o \
 #	fft_3D_lattice.o \
 #	init_sigma1.o \
 #	init_pair_wave.o \
