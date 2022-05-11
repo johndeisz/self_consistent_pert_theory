@@ -1,0 +1,44 @@
+------------Define the lattice ------------
+2    ! Dimensionality of the lattice
+1.0d0 0.0d0 0.0d0   !  a_1,x  a_1,y  a_1,z components of 1st primitive vector in Angstroms
+0.0d0 1.0d0 0.0d0   !  a_2,x a_2,y a_2,z components of 2nd primitive vector (ignored if dim<2)
+0.0d0 0.0d0 0.0d0   !  a_3,x a_3,y a_3,z components of 3rd prim. vector (ignored if dim<3)
+64 64 1             ! N_1, N_2, N_3: number of primitive translations in periodic lattice
+
+-------- Define the atom locations w/ number of orbits per atom
+1    ! Number of unique atomic sites
+0.0d0 0.0d0 0.0d0   ! Atomic location within the primitive cell
+3                   ! Number of orbitals for atom 0
+
+------  Files with tight-binding parameters
+'hk.dat'      ! Hopping parameters + on-site energies
+'hu.dat'      ! Interaction matrices
+'hso.dat'     ! Spin-orbit matrices
+
+-------- Field configuration --------------------------
+0.0d0 0.0d0 0.0d0             ! atom 0, band 0 field: hx, hy, hz (Tesla)
+0.0d0 0.0d0 0.0d0             ! atom 0, band 1 field: hx, hy, hz (Tesla)
+0.0d0 0.0d0 0.0d0             ! atom 0, band 2 field: hx, hy, hz (Tesla)
+0.00d0              ! external pair field strength - iterate to strongest pair channel 
+
+------------Basic thermodynamic parameters -----------------------
+100.0d0            ! temperature (K) 
+-1.5d+00   ! guess for unrenormalized chemical potential (eV)
+4.0d0   1.0d-8    ! electron density, tolerance
+ 
+-------------------- Interaction parameters  ------------------------------
+0.0d0 0.0d0 0.0d0 ! U (uu), U' (up), J (uj) (eV)
+
+-- Perturbations: applied and relaxed over initial 10 iterations ---
+0.0d0       ! Pair field, start random, evolve to strongest channel
+0.0d0 0.0d0 0.0d0      ! Uniform magnetic field (Tesla)
+0.0d0       ! Random band offset (eV)
+
+---------Sigma input and output ----------------------------------------------
+.false. "sig_output"             ! input
+.true. "sig_output"                               ! output
+10                        ! Maximum pade order for output sigma
+
+----------FEA parameters ------------------------------------------------
+1.0d-08 500             ! tolerance in sigma, maximum iterations   
+0.3d0  1       ! alpha, (0 constant, 1 using Sig_HF, 2 using Sig_e0)
