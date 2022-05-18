@@ -13,10 +13,10 @@ program multiband_flex_dca
 
 #include "main_defs.F90"
 
-  call init_environ(rank, size, start_time)
+  call init_environ(rank, np, start_time)
 
   ! Gather all the data from the input file
-  call readin(N_dim, a, N_1, N_2, N_3)
+  call readin(N_dim, a, Nl)
 ! call readin(t, flux, prfld, h, target_density, density_tol, mu, uu,
   ! up, uj, ed, tij, prfld_pert, h_pert, v_pert, h_so, read_input,
   ! sigma_input_file, write_output, sigma_output_file,
@@ -434,6 +434,14 @@ program multiband_flex_dca
 !!$  endif
 !!$
 !!$
+    if (rank .eq. 0) then
+    write(6,*) 'N_dim = ', N_dim
+    write(6,*) 'a(1,*) = ', a(1,1), ' ', a(1,2), ' ', a(1,3)
+    write(6,*) 'a(2,*) = ', a(2,1), ' ', a(2,2), ' ', a(2,3)
+    write(6,*) 'a(3,*) = ', a(3,1), ' ', a(3,2), ' ', a(3,3)
+    write(6,*) 'Nl(*) = ', Nl(1), ' ', Nl(2), ' ', Nl(3)
+    endif
+
   call cpu_time(end_time)
 
   if (rank .eq. 0) then
@@ -444,6 +452,8 @@ program multiband_flex_dca
 #ifdef USE_MPI
   call MPI_Finalize(ierr)
 #endif /* USE_MPI */
+  
+
 
 500 format('xx')
 600 format('xx ', I5, '  ', f5.3,'  ')

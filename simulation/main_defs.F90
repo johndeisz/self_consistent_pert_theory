@@ -1,5 +1,5 @@
 ! MPI variables
-INTEGER rank, size
+INTEGER rank, np
 ! Timing variables
 Real start_time, end_time
 Real last_it_time, this_it_time
@@ -7,7 +7,7 @@ Real last_it_time, this_it_time
   ! Parameters read from input file
   integer N_dim
   double precision a(3,3) 
-  integer N_1, N_2, N_3
+  integer Nl(3)
 ! REAL t
 ! REAL flux(1:3)
 ! REAL prfld

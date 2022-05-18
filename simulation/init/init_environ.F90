@@ -1,6 +1,6 @@
 #include "../convert.F90"
 
-subroutine init_environ(rank, size, starttime)
+subroutine init_environ(rank, np, starttime)
 
   USE CONSTANTS
   IMPLICIT NONE
@@ -10,7 +10,7 @@ subroutine init_environ(rank, size, starttime)
 #endif /* USE_MPI */
 
   Real starttime
-  integer rank, size
+  integer rank, np
   integer ierr
 
   call cpu_time(starttime)
@@ -18,10 +18,10 @@ subroutine init_environ(rank, size, starttime)
 #ifdef USE_MPI
   call MPI_INIT(ierr)
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
-  call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierr)
+  call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ierr)
 #else
   rank = 0
-  size = 1
+  np = 1
 #endif /* USE_MPI */
 
   if (rank .eq. 0) then
@@ -36,30 +36,8 @@ subroutine init_environ(rank, size, starttime)
 #endif /* defined (FEA) */
 
      print *
-     print *, 'Compiled for', np, ' processes.'
-     print *, 'Running on', size, ' processes.'
-
-  endif
-
-  if (np .eq. size)  then
-
-     if (rank == 0) then 
-        print *, 'Compiled and run-time size are the same.'
-        print *, 'Very good.'
-        print *
-     endif
-
-  else 
-
-     if (rank .eq. 0) then
-        print *, 'np not equal size.  Stop.' 
-     endif
-
-#ifdef USE_MPI
-     call MPI_Finalize(ierr)
-#endif /* USE_MPI */
-
-     stop
+     print *, 'Running on', np, ' processes.'
+     print *, 'Note: number of processes must equal 2^n where n is an integer'
 
   endif
 

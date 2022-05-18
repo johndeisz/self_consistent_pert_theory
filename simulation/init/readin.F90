@@ -1,6 +1,6 @@
 #include "../convert.F90"
 
-subroutine readin(N_dim, a, N_1, N_2, N_3)
+subroutine readin(N_dim, a, Nl)
 !!$subroutine readin(t, flux, prfld, h, target_density, density_tol, mu, &
 !!$     uu, up, uj, ed, tij, prfld_pert, h_pert, v_pert, h_so, &
 !!$     read_input, sigma_input_file, write_output, sigma_output_file, & 
@@ -15,7 +15,7 @@ subroutine readin(N_dim, a, N_1, N_2, N_3)
 
   integer N_dim
   double precision a(3,3)
-  integer N_1, N_2, N_3
+  integer Nl(3)
 
 !!$  ! Parameters to be read and returned
 !!$  REAL t
@@ -47,9 +47,9 @@ subroutine readin(N_dim, a, N_1, N_2, N_3)
 !!$  REAL theta_flux
 !!$  COMPLEX phi_flux
 !!$
-!!$  ! MPI variables
-!!$  INTEGER rank
-!!$  INTEGER ierr
+  ! MPI variables
+  INTEGER rank
+  INTEGER ierr
 !!$
 !!$  !     other variable
 !!$  INTEGER icode
@@ -66,11 +66,27 @@ subroutine readin(N_dim, a, N_1, N_2, N_3)
 !!$  REAL delta_strain
 !!$  INTEGER ig
 !!$
-!!$#ifdef USE_MPI
-!!$  call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
-!!$#else
-!!$  rank = 0
-!!$#endif /* USE_MPI */
+#ifdef USE_MPI
+  call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+#else
+  rank = 0
+#endif /* USE_MPI */
+
+  if (rank .eq. 0) then
+     read(5,*)
+     read(5,*) N_dim
+     read(5,*) a(1,1), a(1,2), a(1,3)
+     read(5,*) a(2,1), a(2,2), a(2,3)
+     read(5,*) a(3,1), a(3,2), a(3,3)
+     read(5,*) Nl(1), Nl(2), Nl(3)
+  end if
+
+#ifdef USE_MPI
+  call MPI_Bcast(N_dim, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(a, 9, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(Nl, 3, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+#endif /* USE_MPI */
+  
 !!$
 !!$  pi = acos(-1.0d0)
 !!$  
