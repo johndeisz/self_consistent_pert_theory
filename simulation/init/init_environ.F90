@@ -5,24 +5,20 @@ subroutine init_environ(rank, np, starttime)
   USE CONSTANTS
   IMPLICIT NONE
        
-#ifdef USE_MPI
   include 'mpif.h'
-#endif /* USE_MPI */
 
   Real starttime
   integer rank, np
   integer ierr
+  logical flag_np
+
+  double precision test_np
 
   call cpu_time(starttime)
 
-#ifdef USE_MPI
   call MPI_INIT(ierr)
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
   call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ierr)
-#else
-  rank = 0
-  np = 1
-#endif /* USE_MPI */
 
   if (rank .eq. 0) then
 #if defined (FLEX)
@@ -37,8 +33,21 @@ subroutine init_environ(rank, np, starttime)
 
      print *
      print *, 'Running on', np, ' processes.'
-     print *, 'Note: number of processes must equal 2^n where n is an integer'
+     test_np = dlog(dfloat(np))/dlog(2.0d0)
+     test_np = mod(test_np, 1.0d0)
+     flag_np = .false.
+     if (abs(test_np) .gt. 1.0d-6) then
+       print *, 'Number of mpi processes must equal 2^n'
+       print *, 'Stopping'
+       flag_np = .true.
+     endif
+  endif
 
+  call MPI_Bcast(flag_np, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+  
+  if (flag_np) then
+     call MPI_Finalize(ierr)
+     stop
   endif
 
   return

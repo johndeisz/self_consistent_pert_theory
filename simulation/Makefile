@@ -1,13 +1,8 @@
 SHELL=/bin/sh
 
-CC=gfortran -O3
 MPICC=mpif90 -O3
 # MPICC=/usr/lib64/mpich/bin/mpif90 -O3 -mcmodel=medium -fallow-argument-mismatch
 LIBRARIES= -lfftw3 -lblas -llapack 
-
-ifdef SYS
-  include Make.sys/Make.$(SYS)
-endif
 
 OBJECTS_COMMON = \
 	constants.o \
@@ -81,37 +76,22 @@ OBJECTS_THIRD = \
 #	t_transform.o \
 
 flex : defines = -DSECOND_ORDER -DTHIRD_ORDER -DFLEX  
+flex : CC=$(MPICC)
 flex : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
 flex : $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-	$(CC) -o flex $(OBJECTS) $(LIBRARIES) 
-
-flex-mpi : defines = -DSECOND_ORDER -DTHIRD_ORDER -DFLEX -DUSE_MPI  
-flex-mpi : CC=$(MPICC)
-flex-mpi : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-flex-mpi : $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-	$(CC) -o flex-mpi $(OBJECTS) $(LIBRARIES)
+	$(CC) -o flex $(OBJECTS) $(LIBRARIES)
 
 3rd-order : defines = -DSECOND_ORDER -DTHIRD_ORDER  
+3rd-order : CC=$(MPICC)
 3rd-order : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
 3rd-order :  $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-	$(CC) -o 3rd-order $(OBJECTS) $(LIBRARIES) 
-
-3rd-order-mpi : defines = -DSECOND_ORDER -DTHIRD_ORDER -DUSE_MPI  
-3rd-order-mpi : CC=$(MPICC)
-3rd-order-mpi : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-3rd-order-mpi :  $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-	$(MPICC) -o 3rd-order-mpi $(OBJECTS) $(LIBRARIES)
+	$(MPICC) -o 3rd-order $(OBJECTS) $(LIBRARIES)
 
 2nd-order : defines = -DSECOND_ORDER  
+2nd-order : CC=$(MPICC)
 2nd-order : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND)
 2nd-order :  $(OBJECTS_COMMON) $(OBJECTS_SECOND)
-	$(CC) -o 2nd-order $(OBJECTS) $(LIBRARIES) 
-
-2nd-order-mpi : defines = -DSECOND_ORDER -DUSE_MPI  
-2nd-order-mpi : CC=$(MPICC)
-2nd-order-mpi : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND)
-2nd-order-mpi :  $(OBJECTS_COMMON) $(OBJECTS_SECOND)
-	$(MPICC) -o 2nd-order-mpi $(OBJECTS) $(LIBRARIES)
+	$(MPICC) -o 2nd-order $(OBJECTS) $(LIBRARIES)
 
 1st-order : defines =  
 1st-order : OBJECTS = $(OBJECTS_COMMON) 

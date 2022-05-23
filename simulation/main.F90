@@ -7,9 +7,7 @@ program multiband_flex_dca
 
   IMPLICIT NONE
 
-#ifdef USE_MPI
   include 'mpif.h'
-#endif /* USE_MPI */
 
 #include "main_defs.F90"
 
@@ -449,11 +447,7 @@ program multiband_flex_dca
      write(6,*) 'Execution time = ', end_time-start_time, ' seconds.'
   endif
 
-#ifdef USE_MPI
   call MPI_Finalize(ierr)
-#endif /* USE_MPI */
-  
-
 
 500 format('xx')
 600 format('xx ', I5, '  ', f5.3,'  ')

@@ -107,6 +107,4 @@ Real last_it_time, this_it_time
 ! COMPLEX d_r(0:1,0:1,0:16*nb*nb-1,0:16*nb*nb-1,0:nc1)
 #endif /* SECOND_ORDER */
 
-#ifdef USE_MPI
   INTEGER ierr
-#endif /* USE_MPI */

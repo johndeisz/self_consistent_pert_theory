@@ -9,9 +9,7 @@ subroutine readin(N_dim, a, Nl)
   USE CONSTANTS
   IMPLICIT NONE
 
-#ifdef USE_MPI
   include 'mpif.h'
-#endif
 
   integer N_dim
   double precision a(3,3)
@@ -66,11 +64,7 @@ subroutine readin(N_dim, a, Nl)
 !!$  REAL delta_strain
 !!$  INTEGER ig
 !!$
-#ifdef USE_MPI
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
-#else
-  rank = 0
-#endif /* USE_MPI */
 
   if (rank .eq. 0) then
      read(5,*)
@@ -81,11 +75,9 @@ subroutine readin(N_dim, a, Nl)
      read(5,*) Nl(1), Nl(2), Nl(3)
   end if
 
-#ifdef USE_MPI
   call MPI_Bcast(N_dim, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
   call MPI_Bcast(a, 9, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
   call MPI_Bcast(Nl, 3, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-#endif /* USE_MPI */
   
 !!$
 !!$  pi = acos(-1.0d0)
