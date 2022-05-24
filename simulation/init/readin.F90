@@ -14,7 +14,14 @@ subroutine readin(N_dim, a, Nl)
   integer N_dim
   double precision a(3,3)
   integer Nl(3)
+  
+  logical flag_nl
+  double precision test_nl
 
+  integer il
+
+
+  
 !!$  ! Parameters to be read and returned
 !!$  REAL t
 !!$  REAL flux(1:3)
@@ -78,6 +85,30 @@ subroutine readin(N_dim, a, Nl)
   call MPI_Bcast(N_dim, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
   call MPI_Bcast(a, 9, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
   call MPI_Bcast(Nl, 3, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+
+  if (rank .eq. 0) then
+     flag_nl = .false.
+     do il=1,3
+        print *, 'il, Nl(il) = ', il, ' ', Nl(il)
+        test_nl = dlog(dfloat(Nl(il)))/dlog(2.0d0)
+        test_nl = mod(test_nl, 1.0d0)
+        if (abs(test_nl) .gt. 1.0d-6) then
+           flag_nl = .true.
+        endif
+     enddo
+     if (flag_nl) then
+        print *, 'Each lattice dimension must equal 2^n'
+        print *, 'Stopping'
+     endif
+  endif
+
+  call MPI_Bcast(flag_nl, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+  
+  if (flag_nl) then
+     call MPI_Finalize(ierr)
+     stop
+  endif
+  
   
 !!$
 !!$  pi = acos(-1.0d0)
