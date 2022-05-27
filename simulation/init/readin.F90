@@ -7,6 +7,7 @@ subroutine readin(N_dim, a, Nl)
 !!$     max_pade_order, sigma_tol,  max_it, alpha, alpha_scheme)
 
   USE CONSTANTS
+  USE hamiltonian
   IMPLICIT NONE
 
   include 'mpif.h'
@@ -18,9 +19,7 @@ subroutine readin(N_dim, a, Nl)
   logical flag_nl
   double precision test_nl
 
-  integer il
-
-
+  integer :: il, i_a
   
 !!$  ! Parameters to be read and returned
 !!$  REAL t
@@ -109,8 +108,6 @@ subroutine readin(N_dim, a, Nl)
      stop
   endif
   
-  
-!!$
 !!$  pi = acos(-1.0d0)
 !!$  
 !!$  if (rank .eq. 0) then
@@ -118,15 +115,24 @@ subroutine readin(N_dim, a, Nl)
 !!$     write(6,*) 'lcy = ', lcy
 !!$     write(6,*) 'lcz = ', lcz
 !!$     write(6,*) 'm = ', m
-!!$     write(6,*) 'llx = ', llx
-!!$     write(6,*) 'lly = ', lly
-!!$     write(6,*) 'llz = ', llz
-!!$     write(6,*)
 !!$  endif
 !!$
-!!$  if (rank .eq. 0) then
-!!$
-!!$     read(5,*)
+  if (rank .eq. 0) then
+     read(5,*)
+     read(5,*)
+     read(5,*) N_a
+     write(6,*) 'N_a upon read = ', N_a
+  endif
+  call MPI_Bcast(N_a, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  allocate (r_atom(N_a,3))
+  if (rank .eq. 0) then
+     do i_a = 1, N_a
+        read(5,*) r_atom(i_a, 1), r_atom(i_a, 2), r_atom(i_a, 3)
+     enddo
+  endif
+  call MPI_Bcast(r_atom, N_a*3, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+
+  
 !!$     read(5,*) t
 !!$     read(5,*) prfld
 !!$     do ib = 0, nb - 1

@@ -14,9 +14,6 @@ MODULE Constants
 ! integer, parameter :: lcz = 1
 ! integer, parameter :: nc = lcx*lcy*lcz  
 
-! integer, parameter :: llx = 128    ! lattice dimension >=lcx 
-! integer, parameter :: lly = 128 
-! integer, parameter :: llz = 1
 ! integer, parameter :: nl = llx*lly*llz
 
   ! MPI related constants.

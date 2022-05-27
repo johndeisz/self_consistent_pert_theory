@@ -6,7 +6,8 @@ LIBRARIES= -lfftw3 -lblas -llapack
 
 OBJECTS_COMMON = \
 	constants.o \
- 	main.o \
+	hamiltonian.o \
+	main.o \
 	init_environ.o \
 	readin.o 
 #	bare_dispersion.o \
@@ -100,6 +101,9 @@ flex : $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
 
 constants.o : constants.F90
 	$(CC) -c constants.F90 $(defines)
+
+hamiltonian.o : init/hamiltonian.F90
+	$(CC) -c init/hamiltonian.F90 $(defines)
 
 main.o : main.F90 main_defs.F90 constants.F90
 	$(CC) -c main.F90 $(defines)
@@ -279,4 +283,4 @@ pair_energy.o : thermodynamics/pair_energy.F90 constants.F90
 	$(CC) -c thermodynamics/pair_energy.F90 $(defines)
 
 clean :
-	rm $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD) constants.mod h_zero.mod pade_eval.mod bare_dispersion.mod green_param_lat.mod
+	rm $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD) constants.mod h_zero.mod pade_eval.mod bare_dispersion.mod green_param_lat.mod hamiltonian.mod

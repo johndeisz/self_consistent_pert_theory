@@ -3,6 +3,7 @@
 program multiband_flex_dca
 
   USE CONSTANTS
+  USE hamiltonian
  ! USE bare_dispersion
 
   IMPLICIT NONE

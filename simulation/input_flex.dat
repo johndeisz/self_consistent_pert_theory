@@ -7,7 +7,7 @@
 
 -------- Define the atom locations w/ number of orbits per atom
 1    ! Number of unique atomic sites
-0.0d0 0.0d0 0.0d0   ! Atomic location within the primitive cell
+0.3d0 0.2d0 0.0d0   ! Atomic location within the primitive cell for atom 0
 3                   ! Number of orbitals for atom 0
 
 ------  Files with tight-binding parameters
