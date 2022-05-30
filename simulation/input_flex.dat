@@ -8,12 +8,11 @@
 -------- Define the atom locations w/ number of orbits per atom
 1    ! Number of unique atomic sites
 0.3d0 0.2d0 0.0d0   ! Atomic location within the primitive cell for atom 0
-3                   ! Number of orbitals for atom 0
 
 ------  Files with tight-binding parameters
-'hk.dat'      ! Hopping parameters + on-site energies
-'hu.dat'      ! Interaction matrices
-'hso.dat'     ! Spin-orbit matrices
+"hk_file.dat"      ! Hopping parameters + on-site energies
+"hu.dat"      ! Interaction matrices
+"hso.dat"     ! Spin-orbit matrices
 
 -------- Field configuration --------------------------
 0.0d0 0.0d0 0.0d0             ! atom 0, band 0 field: hx, hy, hz (Tesla)

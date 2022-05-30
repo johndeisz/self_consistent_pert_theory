@@ -1,25 +1,27 @@
 #include "../convert.F90"
 
-subroutine readin(N_dim, a, Nl)
+subroutine readin()
 !!$subroutine readin(t, flux, prfld, h, target_density, density_tol, mu, &
 !!$     uu, up, uj, ed, tij, prfld_pert, h_pert, v_pert, h_so, &
 !!$     read_input, sigma_input_file, write_output, sigma_output_file, & 
 !!$     max_pade_order, sigma_tol,  max_it, alpha, alpha_scheme)
 
   USE CONSTANTS
+  USE lattice
   USE hamiltonian
   IMPLICIT NONE
 
   include 'mpif.h'
 
-  integer N_dim
-  double precision a(3,3)
-  integer Nl(3)
-  
   logical flag_nl
   double precision test_nl
 
-  integer :: il, i_a
+  integer :: il, i_a, i_b, ib
+  character*128 :: hk_file
+  double precision, dimension(:), allocatable :: ed
+  integer, dimension(:), allocatable :: N_o
+
+  integer :: i_o, i_dummy_1, i_dummy_2, nb, ind
   
 !!$  ! Parameters to be read and returned
 !!$  REAL t
@@ -31,7 +33,7 @@ subroutine readin(N_dim, a, Nl)
 !!$
 !!$  REAL uu, up, uj 
 !!$
-!!$  REAL ed(0:nb-1)
+
 !!$  COMPLEX tij(0:nb-1,0:nb-1,-2:2,-2:2,-2:2)
 !!$  COMPLEX h_so(0:2*nb-1, 0:2*nb-1)
 !!$  REAL prfld_pert
@@ -119,7 +121,7 @@ subroutine readin(N_dim, a, Nl)
 !!$
   if (rank .eq. 0) then
      read(5,*)
-     read(5,*)
+     read(5,*) 
      read(5,*) N_a
      write(6,*) 'N_a upon read = ', N_a
   endif
@@ -131,7 +133,98 @@ subroutine readin(N_dim, a, Nl)
      enddo
   endif
   call MPI_Bcast(r_atom, N_a*3, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+!!$  !-----Orbital energies and hopping matrix elements -------------------
 
+  allocate (N_o(N_a))
+
+  if (rank .eq. 0) then
+
+     read(5,*) 
+     read(5,*)
+
+     read(5,*) hk_file
+     open(unit=15, file=hk_file, status='old')
+     read(15,*)
+     nb = 0
+     do i_a = 1, N_a
+       read(15,*) N_o(i_a)
+       nb = nb + N_o(i_a)
+     enddo 
+  endif
+  call MPI_Bcast(nb, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(N_o, N_a, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  allocate (ed(nb))
+  
+   if (rank .eq. 0) then
+     read(15,*) 
+     read(15,*)
+     do ib = 1, nb
+        read(15,*) i_dummy_1, i_dummy_2, ed(ib)
+     enddo
+
+     write(6,*) 'orbital energies '
+     ind = 0
+     do i_a = 1, N_a
+       do i_o = 1, N_o(i_a)
+        ind = ind + 1
+        write(6,*) i_a, i_O, ed(ind)
+       enddo
+     enddo
+     write(6,*)
+     close(unit=15)
+  endif
+  call MPI_Bcast(ed, nb, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
+
+!!$  tij = 0.0d0
+  
+!!$  if (rank .eq. 0) then
+!!$
+!!$     if (Nl(1) .gt. 2) then
+!!$        max_x = 2
+!!$     else
+!!$        max_x = Nl(1) - 1
+!!$     endif
+!!$
+!!$     if (Nl(2) .gt. 2) then
+!!$        max_y = 2
+!!$     else
+!!$        max_y = Nl(2) - 1
+!!$     endif
+
+!!$     if (Nl(3) .gt. 2) then
+!!$        max_z = 2
+!!$     else
+!!$        max_z = Nl(3) - 1
+!!$     endif
+!!$          
+!!$     do ix = -max_x, max_x
+!!$        do iy = -max_y, max_y
+!!$           do iz = -max_z, max_z
+!!$
+!!$              read(5,*)
+!!$              read(5,*)
+!!$              write(6,*) 
+!!$              write(6,200) ix, iy, iz
+!!$              
+!!$              k = mod(ix+llx,llx) + mod(iy+lly,lly)*llx + &
+!!$                   mod(iz+llz,llz)*llx*lly
+
+!!$              do ib = 0, nb-1
+!!$                 do ibp = 0, nb-1
+!!$                    read(5,*) id, idp, tij(ib,ibp,ix,iy,iz)
+!!$                    write(6,300) ib, ibp, real(tij(ib,ibp,ix,iy,iz)), &
+!!$                         aimag(tij(ib,ibp,ix,iy,iz))
+!!$
+!!$                 enddo
+!!$              enddo
+!!$
+!!$           enddo
+!!$        enddo
+!!$     enddo
+!!$
+!!$  endif
+
+!!$  call MPI_Bcast(tij, nb*nb*125, MPI_COMPLEX, 0, MPI_COMM_WORLD, ierr)
   
 !!$     read(5,*) t
 !!$     read(5,*) prfld
@@ -275,108 +368,6 @@ subroutine readin(N_dim, a, Nl)
 !!$  call  MPI_Bcast(alpha_scheme, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 !!$#endif /* USE_MPI */
 !!$
-!!$  !-----Orbital energies and hopping matrix elements -------------------
-!!$
-!!$  if (rank .eq. 0) then
-!!$
-!!$     read(5,*) 
-!!$     read(5,*)
-!!$     read(5,*)
-!!$     read(5,*) flux
-!!$     write(6,*) "x, y and z flux = ", flux
-!!$
-!!$     read(5,*)
-!!$     read(5,*)
-!!$     do ib = 0, nb-1
-!!$        read(5,*) id, ed(ib)
-!!$     enddo
-!!$
-!!$     write(6,*) 'orbital energies '
-!!$     do ib = 0, nb-1
-!!$        write(6,*) ib, ed(ib)
-!!$     enddo
-!!$     write(6,*)
-!!$  endif
-!!$
-!!$  tij = 0.0d0
-!!$  delta_strain = 0.000d0
-!!$  
-!!$  if (rank .eq. 0) then
-!!$
-!!$     write(6,*) "delta_strain = ", delta_strain
-!!$
-!!$     if (llx .gt. 2) then
-!!$        max_x = 2
-!!$     else
-!!$        max_x = llx - 1
-!!$     endif
-!!$
-!!$     if (lly .gt. 2) then
-!!$        max_y = 2
-!!$     else
-!!$        max_y = lly - 1
-!!$     endif
-!!$
-!!$     if (llz .gt. 2) then
-!!$        max_z = 2
-!!$     else
-!!$        max_z = llz - 1
-!!$     endif
-!!$          
-!!$     do ix = -max_x, max_x
-!!$        do iy = -max_y, max_y
-!!$           do iz = -max_z, max_z
-!!$
-!!$              read(5,*)
-!!$              read(5,*)
-!!$              write(6,*) 
-!!$              write(6,200) ix, iy, iz
-!!$              
-!!$              k = mod(ix+llx,llx) + mod(iy+lly,lly)*llx + &
-!!$                   mod(iz+llz,llz)*llx*lly
-!!$
-!!$              theta_flux = 2.0d0*pi*(flux(1)*dfloat(ix)/dfloat(llx) + &
-!!$                        flux(2)*dfloat(iy)/dfloat(lly) + &
-!!$                        flux(3)*dfloat(iz)/dfloat(llz) )
-!!$
-!!$              phi_flux = cexp(cmplx(0.0d0,1.0d0)*theta_flux)
-!!$
-!!$              do ib = 0, nb-1
-!!$                 do ibp = 0, nb-1
-!!$                    read(5,*) id, idp, tij(ib,ibp,ix,iy,iz)
-!!$
-!!$                    if ( (ib .eq. 2) .and. (ibp .eq. 2)) then
-!!$                      
-!!$                      ig = abs(ix) - abs(iy)
-!!$                      if (ig .gt. 0) then
-!!$                        tij(ib,ibp,ix,iy,iz) = tij(ib,ibp,ix,iy,iz)*(1.0+delta_strain)
-!!$                      endif
-!!$
-!!$                      if (ig .lt. 0) then
-!!$                        tij(ib,ibp,ix,iy,iz) = tij(ib,ibp,ix,iy,iz)*(1.0-delta_strain)
-!!$                      endif 
-!!$
-!!$                     endif
-!!$
-!!$
-!!$                    write(6,300) ib, ibp, real(tij(ib,ibp,ix,iy,iz)), &
-!!$                         aimag(tij(ib,ibp,ix,iy,iz))
-!!$
-!!$                    tij(ib,ibp,ix,iy,iz) = tij(ib,ibp,ix,iy,iz)*phi_flux
-!!$                 enddo
-!!$              enddo
-!!$
-!!$           enddo
-!!$        enddo
-!!$     enddo
-!!$
-!!$  endif
-!!$
-!!$#ifdef USE_MPI
-!!$  call MPI_Bcast(flux, 3, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(ed, nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(tij, nb*nb*125, MPI_COMPLEX, 0, MPI_COMM_WORLD, ierr)
-!!$#endif 
 !!$
 !!$  if (rank .eq. 0) then
 !!$     read(5,*)
@@ -407,7 +398,7 @@ subroutine readin(N_dim, a, Nl)
 !!$
 !!$200 format('------------------- [',i3,',',i3,',',i3,'] hopping', &
 !!$         '------------------------')
-!!$300 format(i3,',',i3,'  ','(',D16.9,',',D16.9,')')
+300 format(i3,',',i3,'  ','(',D16.9,',',D16.9,')')
 
   return
 end subroutine readin
