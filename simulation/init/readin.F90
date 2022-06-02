@@ -16,8 +16,7 @@ subroutine readin()
   double precision test_nl
 
   integer :: il, i_a, i_b, ib
-  character*128 :: hk_file
-
+ 
   integer :: i_o, i_dummy_1, i_dummy_2, nb, ind
   
 !!$  ! Parameters to be read and returned
@@ -75,19 +74,10 @@ subroutine readin()
      read(5,*) 
      read(5,*) hk_file
      open(unit=15, file=hk_file, status='old')
-     read(15,*)
-     read(15,*) N_dim
-     read(15,*) a(1,1), a(1,2), a(1,3)
-     read(15,*) a(2,1), a(2,2), a(2,3)
-     read(15,*) a(3,1), a(3,2), a(3,3)
      read(5,*)
      read(5,*)
      read(5,*) Nl(1), Nl(2), Nl(3)
   end if
-
-  call MPI_Bcast(N_dim, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-  call MPI_Bcast(a, 9, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-  call MPI_Bcast(Nl, 3, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
   if (rank .eq. 0) then
      flag_nl = .false.
@@ -111,6 +101,9 @@ subroutine readin()
      call MPI_Finalize(ierr)
      stop
   endif
+  call MPI_Bcast(Nl, 3, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+
+	call read_hamiltonian()
   
 !!$  pi = acos(-1.0d0)
 !!$  
@@ -121,58 +114,8 @@ subroutine readin()
 !!$     write(6,*) 'm = ', m
 !!$  endif
 !!$
-  if (rank .eq. 0) then
-     read(15,*)
-     read(15,*) 
-     read(15,*) N_a
-     write(6,*) 'N_a upon read = ', N_a
-  endif
-  call MPI_Bcast(N_a, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-  allocate (r_atom(N_a,3))
-  if (rank .eq. 0) then
-     do i_a = 1, N_a
-        read(15,*) r_atom(i_a, 1), r_atom(i_a, 2), r_atom(i_a, 3)
-     enddo
-  endif
-  call MPI_Bcast(r_atom, N_a*3, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-!!$  !-----Orbital energies and hopping matrix elements -------------------
+ 
 
-  allocate (N_o(N_a))
-
-  if (rank .eq. 0) then
-
-     read(15,*)
-     read(15,*)
-     nb = 0
-     do i_a = 1, N_a
-       read(15,*) N_o(i_a)
-       write(6,*) 'N_o(i_a) = ', N_o(i_a)
-       nb = nb + N_o(i_a)
-     enddo 
-  endif
-  call MPI_Bcast(nb, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-  call MPI_Bcast(N_o, N_a, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-  allocate (ed(nb))
-  
-   if (rank .eq. 0) then
-     read(15,*) 
-     read(15,*)
-     do ib = 1, nb
-        read(15,*) i_dummy_1, i_dummy_2, ed(ib)
-     enddo
-
-     write(6,*) 'orbital energies '
-     ind = 0
-     do i_a = 1, N_a
-       do i_o = 1, N_o(i_a)
-        ind = ind + 1
-        write(6,*) i_a, i_O, ed(ind)
-       enddo
-     enddo
-     write(6,*)
-     close(unit=15)
-  endif
-  call MPI_Bcast(ed, nb, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
 
 !!$  tij = 0.0d0
   

@@ -16,6 +16,7 @@ program multiband_flex_dca
 
   ! Gather all the data from the input file
   call readin()
+
 ! call readin(t, flux, prfld, h, target_density, density_tol, mu, uu,
   ! up, uj, ed, tij, prfld_pert, h_pert, v_pert, h_so, read_input,
   ! sigma_input_file, write_output, sigma_output_file,
