@@ -1,3 +1,13 @@
+------------Define the lattice ------------
+2    ! Dimensionality of the lattice
+1.0d0 0.0d0 0.0d0   !  a_1,x  a_1,y  a_1,z components of 1st primitive vector in Angstroms
+0.0d0 1.0d0 0.0d0   !  a_2,x a_2,y a_2,z components of 2nd primitive vector (ignored if dim<2)
+0.0d0 0.0d0 0.0d0   !  a_3,x a_3,y a_3,z components of 3rd prim. vector (ignored if dim<3)
+
+-------- Define the atom locations w/ number of orbits per atom
+1    ! Number of unique atomic sites
+0.3d0 0.2d0 0.0d0   ! Atomic location within the primitive cell for atom 0
+
 ---------------Number of orbitals per atom information ---------
 3  !  Orbitals for atom 1
 

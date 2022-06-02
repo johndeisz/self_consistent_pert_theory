@@ -3,7 +3,6 @@
 program multiband_flex_dca
 
   USE CONSTANTS
-  USE lattice
   USE hamiltonian
  ! USE bare_dispersion
 

@@ -2,6 +2,8 @@ MODULE Constants
 
   implicit none
 
+  integer :: Nl(3)
+
 !#include "convert.F90" 
   
 ! integer, parameter :: nb=3 ! number of bands      

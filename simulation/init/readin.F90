@@ -7,7 +7,6 @@ subroutine readin()
 !!$     max_pade_order, sigma_tol,  max_it, alpha, alpha_scheme)
 
   USE CONSTANTS
-  USE lattice
   USE hamiltonian
   IMPLICIT NONE
 
@@ -18,8 +17,6 @@ subroutine readin()
 
   integer :: il, i_a, i_b, ib
   character*128 :: hk_file
-  double precision, dimension(:), allocatable :: ed
-  integer, dimension(:), allocatable :: N_o
 
   integer :: i_o, i_dummy_1, i_dummy_2, nb, ind
   
@@ -75,11 +72,16 @@ subroutine readin()
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
 
   if (rank .eq. 0) then
+     read(5,*) 
+     read(5,*) hk_file
+     open(unit=15, file=hk_file, status='old')
+     read(15,*)
+     read(15,*) N_dim
+     read(15,*) a(1,1), a(1,2), a(1,3)
+     read(15,*) a(2,1), a(2,2), a(2,3)
+     read(15,*) a(3,1), a(3,2), a(3,3)
      read(5,*)
-     read(5,*) N_dim
-     read(5,*) a(1,1), a(1,2), a(1,3)
-     read(5,*) a(2,1), a(2,2), a(2,3)
-     read(5,*) a(3,1), a(3,2), a(3,3)
+     read(5,*)
      read(5,*) Nl(1), Nl(2), Nl(3)
   end if
 
@@ -120,16 +122,16 @@ subroutine readin()
 !!$  endif
 !!$
   if (rank .eq. 0) then
-     read(5,*)
-     read(5,*) 
-     read(5,*) N_a
+     read(15,*)
+     read(15,*) 
+     read(15,*) N_a
      write(6,*) 'N_a upon read = ', N_a
   endif
   call MPI_Bcast(N_a, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
   allocate (r_atom(N_a,3))
   if (rank .eq. 0) then
      do i_a = 1, N_a
-        read(5,*) r_atom(i_a, 1), r_atom(i_a, 2), r_atom(i_a, 3)
+        read(15,*) r_atom(i_a, 1), r_atom(i_a, 2), r_atom(i_a, 3)
      enddo
   endif
   call MPI_Bcast(r_atom, N_a*3, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
@@ -139,15 +141,12 @@ subroutine readin()
 
   if (rank .eq. 0) then
 
-     read(5,*) 
-     read(5,*)
-
-     read(5,*) hk_file
-     open(unit=15, file=hk_file, status='old')
+     read(15,*)
      read(15,*)
      nb = 0
      do i_a = 1, N_a
        read(15,*) N_o(i_a)
+       write(6,*) 'N_o(i_a) = ', N_o(i_a)
        nb = nb + N_o(i_a)
      enddo 
   endif

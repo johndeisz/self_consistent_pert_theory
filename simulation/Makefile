@@ -7,7 +7,6 @@ LIBRARIES= -lfftw3 -lblas -llapack
 OBJECTS_COMMON = \
 	constants.o \
 	hamiltonian.o \
-	lattice.o \
 	main.o \
 	init_environ.o \
 	readin.o 
@@ -105,9 +104,6 @@ constants.o : constants.F90
 
 hamiltonian.o : init/hamiltonian.F90
 	$(CC) -c init/hamiltonian.F90 $(defines)
-
-lattice.o : init/lattice.F90
-	$(CC) -c init/lattice.F90 $(defines)
 
 main.o : main.F90 main_defs.F90 constants.F90
 	$(CC) -c main.F90 $(defines)
