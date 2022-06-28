@@ -4,13 +4,11 @@ INTEGER rank, np
 Real start_time, end_time
 Real last_it_time, this_it_time
 
-  ! Parameters read from input file
-! REAL t
+! Parameters read from input file
 ! REAL flux(1:3)
 ! REAL prfld
 ! REAL h(0:nb-1,1:3)
-! REAL target_density, density_tol
-! REAL mu
+double precision :: target_density, density_tol, mu
 ! REAL uu, up, uj
 
 ! REAL ed(0:nb-1)
@@ -25,13 +23,13 @@ Real last_it_time, this_it_time
 ! REAL prfld_eff
 ! REAL h_eff(0:nb-1,1:3)
 ! REAL v_pert_eff(0:nb-1)
-! LOGICAL read_input, write_output
-! CHARACTER*128 sigma_input_file, sigma_output_file
-! INTEGER max_pade_order
-! REAL sigma_tol
-! INTEGER max_it
-! REAL alpha
-! INTEGER alpha_scheme
+ LOGICAL :: read_input, write_output
+ CHARACTER*128 :: sigma_input_file, sigma_output_file
+ INTEGER :: max_pade_order
+ DOUBLE PRECISION :: sigma_tol
+ INTEGER max_it
+ DOUBLE PRECISION :: alpha
+ INTEGER alpha_scheme
 
   !     Dispersion and bare vertex
 ! REAL ek_min

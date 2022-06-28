@@ -1,10 +1,10 @@
 #include "../convert.F90"
 
-subroutine readin()
-!!$subroutine readin(t, flux, prfld, h, target_density, density_tol, mu, &
-!!$     uu, up, uj, ed, tij, prfld_pert, h_pert, v_pert, h_so, &
-!!$     read_input, sigma_input_file, write_output, sigma_output_file, & 
-!!$     max_pade_order, sigma_tol,  max_it, alpha, alpha_scheme)
+subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file, &
+     write_output, sigma_output_file, max_pade_order, &
+     sigma_tol, max_it, alpha, alpha_scheme )
+!!$subroutine readin(flux, prfld, h, &
+!!$     uu, up, uj, ed, tij, prfld_pert, h_pert, v_pert, h_so ) 
 
   USE CONSTANTS
   USE hamiltonian
@@ -16,16 +16,19 @@ subroutine readin()
   double precision test_nl
 
   integer :: il, i_a, i_b, ib
- 
   integer :: i_o, i_dummy_1, i_dummy_2, nb, ind
   
-!!$  ! Parameters to be read and returned
-!!$  REAL t
-!!$  REAL flux(1:3)
+! Parameters to be read and returned
+  double precision :: target_density, density_tol, mu
+  LOGICAL read_input, write_output
+  CHARACTER*128 sigma_input_file, sigma_output_file
+  INTEGER max_pade_order
+
+  double precision :: sigma_tol, alpha
+  INTEGER :: alpha_scheme, max_it
+  
 !!$  REAL prfld
 !!$  REAL h(0:nb-1,1:3)
-!!$  REAL target_density, density_tol
-!!$  REAL mu 
 !!$
 !!$  REAL uu, up, uj 
 !!$
@@ -37,13 +40,8 @@ subroutine readin()
 !!$  REAL h_pert(0:nb-1,1:3)
 !!$  REAL v_pert_amp
 !!$  REAL v_pert(0:nb-1)
-!!$  LOGICAL read_input, write_output
-!!$  CHARACTER*128 sigma_input_file, sigma_output_file
-!!$  INTEGER max_pade_order
-!!$  REAL sigma_tol
-!!$  INTEGER max_it
-!!$  REAL alpha
-!!$  INTEGER alpha_scheme
+
+
 !!$
 !!$  REAL pi
 !!$  REAL theta_flux
@@ -54,7 +52,7 @@ subroutine readin()
   INTEGER ierr
 !!$
 !!$  !     other variable
-!!$  INTEGER icode
+  INTEGER icode
 !!$  INTEGER i
 !!$  REAL tmp_hop(1:5)
 !!$
@@ -103,20 +101,103 @@ subroutine readin()
   endif
   call MPI_Bcast(Nl, 3, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
-	call read_hamiltonian()
+  call read_hamiltonian()
+
+  if (rank .eq. 0) then
+     read(5,*)
+     read(5,*) 
+     read(5,*) t
+
+     read(5,*) target_density, density_tol
+     read(5,*) mu
+        
+     write(6,*) "Basic Thermodynamic Parameters" 
+     write(6,*) "temperature in K = ", t  
+
+     write(6,*) "target electron density = ", target_density
+     write(6,*) "density tolerance = ", density_tol
+     write(6,*) "default initial chemical potential = ", mu
+
+     open (unit=20, file='converged_mu',status='old', iostat=icode)
+
+     if (icode .ne. 0) then
+        write (6,*) 'File converged_mu not found, using default value for mu.'
+     else 
+        write (6,*) 'File converged_mu found.'
+        read (20,*) mu
+        write (6,*) 'Using mu = ',mu
+     endif
+     close (20)
+     write(6,*) ' '
+
+  endif
+
+  call MPI_Bcast(t, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+ 
+  call MPI_Bcast(target_density, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(density_tol, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(mu, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+
+  !------------------------Sigma Input and Output --------------------------
+      
+  if (rank .eq. 0) then
+     read(5,*)
+     read(5,*)
+     read(5,*) read_input, sigma_input_file
+     read(5,*) write_output, sigma_output_file
+     read(5,*) max_pade_order
+
+     write(6,*) "Sigma input and output"
+     write(6,*) "read sigma input file = ", read_input
+     write(6,*) "Sigma input file = ", sigma_input_file
+     write(6,*) "write sigma input file = ", write_output
+     write(6,*) "Sigma output file = ", sigma_output_file
+     write(6,*) "Maximum pade order for output sigma = ", max_pade_order    
+  endif
+
+  call MPI_Bcast(read_input, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(write_output, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(max_pade_order, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+
+
+!----------------------------FEA parameters ------------------------------
+
+  if (rank .eq. 0) then
+
+     read(5,*)
+     read(5,*)
+     read(5,*) sigma_tol,  max_it
+     read(5,*) alpha, alpha_scheme
+     
+     write(6,*) "Flex parameters"
+     write(6,*) "Tolerance in sigma = ", sigma_tol
+     write(6,*) "Maximum iterations = ", max_it 
+     write(6,*) "alpha = ", alpha, " alpha scheme = ", alpha_scheme
+     
+  endif
+
+  call MPI_Bcast(sigma_tol, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(max_it, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(alpha, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(alpha_scheme, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  
+!!$     read(5,*) prfld
+!!$     do ib = 0, nb - 1
+!!$        read(5,*) h(ib,:)
+!!$     enddo  
+!!$     
+!!$     write(6,*) "external pairing field = ", prfld
+!!$     write(6,*) "Band-dependent magnetic fields (Tesla)"
+!!$     do ib = 0, nb-1
+!!$        write(6,*) h(ib,:)
+!!$     enddo
+
+!!$ call MPI_Bcast(prfld, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
+!!$  call MPI_Bcast(h, 3*nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
   
 !!$  pi = acos(-1.0d0)
 !!$  
-!!$  if (rank .eq. 0) then
-!!$     write(6,*) 'lcx = ', lcx
-!!$     write(6,*) 'lcy = ', lcy
-!!$     write(6,*) 'lcz = ', lcz
-!!$     write(6,*) 'm = ', m
-!!$  endif
-!!$
  
-
-
 !!$  tij = 0.0d0
   
 !!$  if (rank .eq. 0) then
@@ -168,48 +249,6 @@ subroutine readin()
 
 !!$  call MPI_Bcast(tij, nb*nb*125, MPI_COMPLEX, 0, MPI_COMM_WORLD, ierr)
   
-!!$     read(5,*) t
-!!$     read(5,*) prfld
-!!$     do ib = 0, nb - 1
-!!$        read(5,*) h(ib,:)
-!!$     enddo
-!!$     read(5,*) target_density, density_tol
-!!$     read(5,*) mu
-!!$        
-!!$     write(6,*) "Basic Thermodynamic Parameters" 
-!!$     write(6,*) "temperature in K = ", t  
-!!$     
-!!$     write(6,*) "external pairing field = ", prfld
-!!$     write(6,*) "Band-dependent magnetic fields (Tesla)"
-!!$     do ib = 0, nb-1
-!!$        write(6,*) h(ib,:)
-!!$     enddo
-!!$     write(6,*) "target electron density = ", target_density
-!!$     write(6,*) "density tolerance = ", density_tol
-!!$     write(6,*) "default initial chemical potential = ", mu
-!!$
-!!$     open (unit=20, file='converged_mu',status='old', iostat=icode)
-!!$
-!!$     if (icode .ne. 0) then
-!!$        write (6,*) 'File converged_mu not found, using default value for mu.'
-!!$     else 
-!!$        write (6,*) 'File converged_mu found.'
-!!$        read (20,*) mu
-!!$        write (6,*) 'Using mu = ',mu
-!!$     endif
-!!$     close (20)
-!!$     write(6,*) ' '
-!!$
-!!$  endif
-!!$
-!!$#ifdef USE_MPI
-!!$  call MPI_Bcast(t, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(prfld, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(h, 3*nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(target_density, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(density_tol, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(mu, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$#endif
 !!$
 !!$  !----------------------Interaction Parameters ------------------------
 !!$
@@ -262,53 +301,7 @@ subroutine readin()
 !!$  call MPI_Bcast(v_pert, nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
 !!$#endif
 !!$
-!!$  !------------------------Sigma Input and Output --------------------------
-!!$      
-!!$  if (rank .eq. 0) then
-!!$
-!!$     read(5,*)
-!!$     read(5,*)
-!!$     read(5,*) read_input, sigma_input_file
-!!$     read(5,*) write_output, sigma_output_file
-!!$     read(5,*) max_pade_order
-!!$
-!!$     write(6,*) "Sigma input and output"
-!!$     write(6,*) "read sigma input file = ", read_input
-!!$     write(6,*) "Sigma input file = ", sigma_input_file
-!!$     write(6,*) "write sigma input file = ", write_output
-!!$     write(6,*) "Sigma output file = ", sigma_output_file
-!!$     write(6,*) "Maximum pade order for output sigma = ", max_pade_order
-!!$     
-!!$  endif
-!!$
-!!$#ifdef USE_MPI
-!!$  call MPI_Bcast(read_input, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(write_output, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(max_pade_order, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-!!$#endif
-!!$
-!!$!----------------------------FEA parameters ------------------------------
-!!$
-!!$  if (rank .eq. 0) then
-!!$
-!!$     read(5,*)
-!!$     read(5,*)
-!!$     read(5,*) sigma_tol,  max_it
-!!$     read(5,*) alpha, alpha_scheme
-!!$     
-!!$     write(6,*) "Flex parameters"
-!!$     write(6,*) "Tolerance in sigma = ", sigma_tol
-!!$     write(6,*) "Maximum iterations = ", max_it 
-!!$     write(6,*) "alpha = ", alpha, " alpha scheme = ", alpha_scheme
-!!$     
-!!$  endif
-!!$
-!!$#ifdef USE_MPI
-!!$  call MPI_Bcast(sigma_tol, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(max_it, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(alpha, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call  MPI_Bcast(alpha_scheme, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-!!$#endif /* USE_MPI */
+
 !!$
 !!$
 !!$  if (rank .eq. 0) then

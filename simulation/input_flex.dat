@@ -4,28 +4,10 @@
 ------------Define the lattice ------------
 64 64 1             ! N_1, N_2, N_3: number of primitive translations in periodic lattice
 
-------  Files with tight-binding parameters
-"hu.dat"      ! Interaction matrices
-"hso.dat"     ! Spin-orbit matrices
-
--------- Field configuration --------------------------
-0.0d0 0.0d0 0.0d0             ! atom 0, band 0 field: hx, hy, hz (Tesla)
-0.0d0 0.0d0 0.0d0             ! atom 0, band 1 field: hx, hy, hz (Tesla)
-0.0d0 0.0d0 0.0d0             ! atom 0, band 2 field: hx, hy, hz (Tesla)
-0.00d0              ! external pair field strength - iterate to strongest pair channel 
-
 ------------Basic thermodynamic parameters -----------------------
 100.0d0            ! temperature (K) 
--1.5d+00   ! guess for unrenormalized chemical potential (eV)
 4.0d0   1.0d-8    ! electron density, tolerance
- 
--------------------- Interaction parameters  ------------------------------
-0.0d0 0.0d0 0.0d0 ! U (uu), U' (up), J (uj) (eV)
-
--- Perturbations: applied and relaxed over initial 10 iterations ---
-0.0d0       ! Pair field, start random, evolve to strongest channel
-0.0d0 0.0d0 0.0d0      ! Uniform magnetic field (Tesla)
-0.0d0       ! Random band offset (eV)
+-1.5d+00   ! guess for unrenormalized chemical potential (eV)
 
 ---------Sigma input and output ----------------------------------------------
 .false. "sig_output"             ! input
@@ -35,3 +17,22 @@
 ----------FEA parameters ------------------------------------------------
 1.0d-08 500             ! tolerance in sigma, maximum iterations   
 0.3d0  1       ! alpha, (0 constant, 1 using Sig_HF, 2 using Sig_e0)
+
+------  Files with tight-binding parameters
+"hu.dat"      ! Interaction matrices
+"hso.dat"     ! Spin-orbit matrices
+
+-------- Field configuration --------------------------
+0.0d0 0.0d0 0.0d0             ! atom 0, band 0 field: hx, hy, hz (Tesla)
+0.0d0 0.0d0 0.0d0             ! atom 0, band 1 field: hx, hy, hz (Tesla)
+0.0d0 0.0d0 0.0d0             ! atom 0, band 2 field: hx, hy, hz (Tesla)
+0.00d0              ! external pair field strength - iterate to strongest pair channel 
+ 
+-------------------- Interaction parameters  ------------------------------
+0.0d0 0.0d0 0.0d0 ! U (uu), U' (up), J (uj) (eV)
+
+-- Perturbations: applied and relaxed over initial 10 iterations ---
+0.0d0       ! Pair field, start random, evolve to strongest channel
+0.0d0 0.0d0 0.0d0      ! Uniform magnetic field (Tesla)
+0.0d0       ! Random band offset (eV)
+
