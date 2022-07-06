@@ -33,7 +33,6 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
 !!$  REAL uu, up, uj 
 !!$
 
-!!$  COMPLEX tij(0:nb-1,0:nb-1,-2:2,-2:2,-2:2)
 !!$  COMPLEX h_so(0:2*nb-1, 0:2*nb-1)
 !!$  REAL prfld_pert
 !!$  REAL h_pert_amp(1:3)
@@ -198,57 +197,6 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
 !!$  pi = acos(-1.0d0)
 !!$  
  
-!!$  tij = 0.0d0
-  
-!!$  if (rank .eq. 0) then
-!!$
-!!$     if (Nl(1) .gt. 2) then
-!!$        max_x = 2
-!!$     else
-!!$        max_x = Nl(1) - 1
-!!$     endif
-!!$
-!!$     if (Nl(2) .gt. 2) then
-!!$        max_y = 2
-!!$     else
-!!$        max_y = Nl(2) - 1
-!!$     endif
-
-!!$     if (Nl(3) .gt. 2) then
-!!$        max_z = 2
-!!$     else
-!!$        max_z = Nl(3) - 1
-!!$     endif
-!!$          
-!!$     do ix = -max_x, max_x
-!!$        do iy = -max_y, max_y
-!!$           do iz = -max_z, max_z
-!!$
-!!$              read(5,*)
-!!$              read(5,*)
-!!$              write(6,*) 
-!!$              write(6,200) ix, iy, iz
-!!$              
-!!$              k = mod(ix+llx,llx) + mod(iy+lly,lly)*llx + &
-!!$                   mod(iz+llz,llz)*llx*lly
-
-!!$              do ib = 0, nb-1
-!!$                 do ibp = 0, nb-1
-!!$                    read(5,*) id, idp, tij(ib,ibp,ix,iy,iz)
-!!$                    write(6,300) ib, ibp, real(tij(ib,ibp,ix,iy,iz)), &
-!!$                         aimag(tij(ib,ibp,ix,iy,iz))
-!!$
-!!$                 enddo
-!!$              enddo
-!!$
-!!$           enddo
-!!$        enddo
-!!$     enddo
-!!$
-!!$  endif
-
-!!$  call MPI_Bcast(tij, nb*nb*125, MPI_COMPLEX, 0, MPI_COMM_WORLD, ierr)
-  
 !!$
 !!$  !----------------------Interaction Parameters ------------------------
 !!$

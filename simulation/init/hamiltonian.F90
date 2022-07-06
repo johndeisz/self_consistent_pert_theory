@@ -1,4 +1,5 @@
 MODULE Hamiltonian
+  USE CONSTANTS 
 
   character*128 :: hk_file
   integer :: N_dim
@@ -10,12 +11,19 @@ MODULE Hamiltonian
   double precision, dimension(:), allocatable :: ed
   integer, dimension(:), allocatable :: N_o
 
+  double complex, dimension(:,:), allocatable :: tij_temp
+  double complex, dimension(:,:,:,:,:), allocatable :: tij
+  
 CONTAINS	
   subroutine read_hamiltonian()
 	
     ! MPI variables
+    implicit none
     include 'mpif.h'
     INTEGER :: rank, ierr
+    INTEGER :: i_a, i_dummy_1, i_dummy_2, i1, i2, i3, jb, n_points, ip, ibp
+    INTEGER :: nb, i_o, ib, ind
+    double precision :: im_tij, re_tij
 
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
 
@@ -81,10 +89,70 @@ CONTAINS
           enddo
        enddo
        write(6,*)	
-       close(unit=15)
     endif
     call MPI_Bcast(ed, nb, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)  	
-     	
+
+    allocate (tij(0:nb-1,0:nb-1,0:Nl(1)-1,0:Nl(2)-1,0:Nl(3)-1))
+    tij = dcmplx(0.0d0, 0.0d0)
+    allocate (tij_temp(0:nb-1, 0:nb-1))
+    
+    if (rank .eq. 0) then
+
+     read(15,*) 
+     read(15,*)
+     read(15,*) n_points
+  endif
+  call MPI_Bcast(n_points, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+
+  
+  do ip = 1, n_points
+     if (rank .eq. 0) then
+        read(15,*) i1, i2, i3
+        i1 = mod(i1+Nl(1),Nl(1))
+        i2 = mod(i2+Nl(2),Nl(2))
+        i3 = mod(i3+Nl(3),Nl(3))
+        write(6,*) 'i1 = ', i1, ' i2 = ', i2, ' i3=', i3
+        do jb = 1, nb*nb
+           read(15,*) ib, ibp, re_tij, im_tij
+           tij_temp(ib, ibp) = dcmplx(re_tij, im_tij)
+        enddo
+     endif
+     call MPI_Bcast(i1, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+     call MPI_Bcast(i2, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+     call MPI_Bcast(i3, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+     call MPI_Bcast(tij_temp, nb*nb, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
+     tij(:,:, i1, i2, i3) = tij_temp(:,:)
+     
+  enddo
+  if (rank .eq. 0) then
+     close(unit=15)
+  endif
+
+!!$     do ix = -max_x, max_x
+!!$        do iy = -max_y, max_y
+!!$           do iz = -max_z, max_z
+!!$
+!!$              read(5,*)
+!!$              read(5,*)
+!!$              write(6,*) 
+!!$              write(6,200) ix, iy, iz
+!!$              
+!!$              k = + mod(iy+lly,lly)*llx + &
+!!$                   mod(iz+llz,llz)*llx*lly
+!!$
+!!$              do ib = 0, nb-1
+!!$                 do ibp = 0, nb-1
+!!$                    read(5,*) id, idp, tij(ib,ibp,ix,iy,iz)
+!!$                    write(6,300) ib, ibp, real(tij(ib,ibp,ix,iy,iz)), &
+!!$                         aimag(tij(ib,ibp,ix,iy,iz))
+!!$
+!!$                 enddo
+!!$              enddo
+!!$
+!!$           enddo
+!!$        enddo
+!!$     enddo
+
   end subroutine read_hamiltonian
 
 end MODULE Hamiltonian

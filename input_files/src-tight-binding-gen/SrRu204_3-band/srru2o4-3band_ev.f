@@ -22,8 +22,8 @@ c Parameterization taken from Pavarini and Mazin, PRB 74 035115 (2006)
 
 c Convert to eV
 
-c      ed = ed * 13.605698066d0 / 1000.0d0
-c      hop = hop * 13.605698066d0 / 1000.0d0
+      ed = ed * 13.605698066d0 / 1000.0d0
+      hop = hop * 13.605698066d0 / 1000.0d0
 
       do ix = -2, 2
         do iy = -2, 2
@@ -52,6 +52,10 @@ c      hop = hop * 13.605698066d0 / 1000.0d0
       write(6,*) 1, ed(1)
       write(6,*) 2, ed(2)
 
+      write(6,*) ' -----  Hopping matrix ------ '
+
+
+      write(6,*) '25      ! Number of points in hopping matrix ' 
       do ix = -2,2
         do iy = -2,2
           write(6,200) ix,iy, 0
