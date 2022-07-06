@@ -1,5 +1,6 @@
 ------  Files with lattice and tight-binding parameters
 "hk_file.dat"      ! Lattice information, hopping parameters + on-site energies
+"hu_file.dat"           ! Interaction parameters
 
 ------------Define the lattice ------------
 64 64 1             ! N_1, N_2, N_3: number of primitive translations in periodic lattice
@@ -19,7 +20,6 @@
 0.3d0  1       ! alpha, (0 constant, 1 using Sig_HF, 2 using Sig_e0)
 
 ------  Files with tight-binding parameters
-"hu.dat"      ! Interaction matrices
 "hso.dat"     ! Spin-orbit matrices
 
 -------- Field configuration --------------------------

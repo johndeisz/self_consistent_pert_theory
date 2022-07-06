@@ -1,2 +1,12 @@
 -------------------- Interaction parameters  ------------------------------
-0.0d0 0.0d0 0.0d0 ! U (uu), U' (up), J (uj) (eV)
+1   ! Number of atoms with interactions
+3
+0 0  2.72d0  0.0d0  ! orbital_a, orbital_b, U, J 
+1 1  2.72d0  0.0d0  
+2 2  2.9d0   0.0d0  
+0 1  0.68d0  0.1d0  
+1 0  0.68d0  0.1d0
+0 2  0.75d0  0.2d0
+2 0  0.75d0  0.2d0
+1 2  0.75d0  0.2d0
+2 1  0.75d0  0.2d0

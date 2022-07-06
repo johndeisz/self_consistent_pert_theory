@@ -3,8 +3,8 @@
 subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file, &
      write_output, sigma_output_file, max_pade_order, &
      sigma_tol, max_it, alpha, alpha_scheme )
-!!$subroutine readin(flux, prfld, h, &
-!!$     uu, up, uj, ed, tij, prfld_pert, h_pert, v_pert, h_so ) 
+!!$subroutine readin(prfld, h, &
+!!$      prfld_pert, h_pert, v_pert, h_so ) 
 
   USE CONSTANTS
   USE hamiltonian
@@ -43,8 +43,6 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
 
 !!$
 !!$  REAL pi
-!!$  REAL theta_flux
-!!$  COMPLEX phi_flux
 !!$
   ! MPI variables
   INTEGER rank
@@ -71,6 +69,8 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
      read(5,*) 
      read(5,*) hk_file
      open(unit=15, file=hk_file, status='old')
+     read(5,*) hu_file
+     open(unit=25, file=hu_file, status='old')
      read(5,*)
      read(5,*)
      read(5,*) Nl(1), Nl(2), Nl(3)
@@ -197,28 +197,6 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
 !!$  pi = acos(-1.0d0)
 !!$  
  
-!!$
-!!$  !----------------------Interaction Parameters ------------------------
-!!$
-!!$  if (rank .eq. 0) then
-!!$     read(5,*)
-!!$     read(5,*)
-!!$     read(5,*) uu, up, uj 
-!!$
-!!$     write(6,*) "Interaction parameters"
-!!$     write(6,*) "Intraorbital Coulomb = ", uu
-!!$     write(6,*) "Interorbital Coulomb = ", up
-!!$     write(6,*) "Interorbital exchange = ", uj
-!!$     
-!!$  endif
-!!$
-!!$#ifdef USE_MPI
-!!$  call MPI_Bcast(uu, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(up, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(uj, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$#endif 
-!!$
-!!$
 !!$
 !!$  !-----Perturbations: applied and relaxed over initial 10 iterations -------
 !!$

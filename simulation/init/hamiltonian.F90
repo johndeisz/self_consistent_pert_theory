@@ -1,11 +1,11 @@
 MODULE Hamiltonian
   USE CONSTANTS 
 
-  character*128 :: hk_file
+  character*128 :: hk_file, hu_file
   integer :: N_dim
   double precision :: a(3,3)
   
-  integer :: N_a
+  integer :: N_a, N_int_a
   double precision, dimension(:,:), allocatable :: r_atom
 
   double precision, dimension(:), allocatable :: ed
@@ -13,6 +13,9 @@ MODULE Hamiltonian
 
   double complex, dimension(:,:), allocatable :: tij_temp
   double complex, dimension(:,:,:,:,:), allocatable :: tij
+
+  double precision, dimension(:,:,:), allocatable :: uup, uuj
+  integer, parameter :: max_orbitals_per_atom = 5
   
 CONTAINS	
   subroutine read_hamiltonian()
@@ -22,9 +25,12 @@ CONTAINS
     include 'mpif.h'
     INTEGER :: rank, ierr
     INTEGER :: i_a, i_dummy_1, i_dummy_2, i1, i2, i3, jb, n_points, ip, ibp
-    INTEGER :: nb, i_o, ib, ind
-    double precision :: im_tij, re_tij
-
+    INTEGER :: nb, i_o, ib, ind, N_o_int, m_size
+    double precision :: im_tij, re_tij, uuij, ujij
+    double precision, dimension(0:max_orbitals_per_atom-1, &
+         0:max_orbitals_per_atom-1) :: uu_temp, uj_temp
+    LOGICAL :: i_terminate
+    
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
 
     if (rank .eq. 0) then
@@ -72,20 +78,20 @@ CONTAINS
     endif
     call MPI_Bcast(nb, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
     call MPI_Bcast(N_o, N_a, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    allocate (ed(nb))
+    allocate (ed(0:nb-1))
      	
     if (rank .eq. 0) then
        read(15,*) 
        read(15,*)
-       do ib = 1, nb
+       do ib = 0, nb-1
           read(15,*) i_dummy_1, i_dummy_2, ed(ib)
        enddo
        write(6,*) 'orbital energies '
        ind = 0
        do i_a = 1, N_a
           do i_o = 1, N_o(i_a)
+             write(6,*) i_a, i_o, ed(ind)
              ind = ind + 1
-             write(6,*) i_a, i_O, ed(ind)
           enddo
        enddo
        write(6,*)	
@@ -128,30 +134,60 @@ CONTAINS
      close(unit=15)
   endif
 
-!!$     do ix = -max_x, max_x
-!!$        do iy = -max_y, max_y
-!!$           do iz = -max_z, max_z
-!!$
-!!$              read(5,*)
-!!$              read(5,*)
-!!$              write(6,*) 
-!!$              write(6,200) ix, iy, iz
-!!$              
-!!$              k = + mod(iy+lly,lly)*llx + &
-!!$                   mod(iz+llz,llz)*llx*lly
-!!$
-!!$              do ib = 0, nb-1
-!!$                 do ibp = 0, nb-1
-!!$                    read(5,*) id, idp, tij(ib,ibp,ix,iy,iz)
-!!$                    write(6,300) ib, ibp, real(tij(ib,ibp,ix,iy,iz)), &
-!!$                         aimag(tij(ib,ibp,ix,iy,iz))
-!!$
-!!$                 enddo
-!!$              enddo
-!!$
-!!$           enddo
-!!$        enddo
-!!$     enddo
+  !----------------------Interaction Parameters ------------------------
+
+  if (rank .eq. 0) then
+     read(25,*)
+     read(25,*) N_int_a   ! Number of atoms with interactions
+  endif
+  call MPI_Bcast(N_int_a, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  allocate (uup(0:N_int_a-1, 0:max_orbitals_per_atom-1, 0:max_orbitals_per_atom-1))
+  allocate (uuj(0:N_int_a-1, 0:max_orbitals_per_atom-1, 0:max_orbitals_per_atom-1))
+
+  uup = 0.0d0
+  uuj = 0.0d0
+  
+  do i_a = 0, N_int_a-1
+     i_terminate = .false.
+     if (rank .eq. 0) then
+
+        read(25,*) N_o_int
+        if ( (N_o_int .ne. N_o(i_a+1)) .or.  &
+             (N_o_int .gt. max_orbitals_per_atom) ) then
+           i_terminate = .true.
+        endif
+
+     endif
+     call MPI_Bcast(i_terminate, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+     if (i_terminate) then
+        if (rank .eq. 0) then
+           write(6,*) 'Problem with number of interacting orbitals - stopping'
+        endif
+        stop
+     endif
+
+     if (rank .eq. 0) then
+        do i_dummy_1 = 1, N_o_int*N_o_int
+           read(25,*) i1, i2, uuij, ujij
+           uu_temp(i1,i2) = uuij
+           uj_temp(i1,i2) = ujij
+        enddo
+     endif
+
+     m_size = max_orbitals_per_atom * max_orbitals_per_atom
+      call MPI_Bcast(uu_temp, m_size, MPI_DOUBLE_PRECISION, &
+           0, MPI_COMM_WORLD, ierr)
+      call MPI_Bcast(uj_temp, max_orbitals_per_atom**2, MPI_DOUBLE_PRECISION, &
+           0, MPI_COMM_WORLD, ierr)
+
+      uup(i_a,:,:) = uu_temp
+      uuj(i_a,:,:) = uj_temp
+
+  enddo
+
+  if (rank .eq. 0) then
+     close(unit =25)
+  endif
 
   end subroutine read_hamiltonian
 
