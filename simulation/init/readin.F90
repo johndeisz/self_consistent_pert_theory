@@ -30,10 +30,7 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
 !!$  REAL prfld
 !!$  REAL h(0:nb-1,1:3)
 !!$
-!!$  REAL uu, up, uj 
-!!$
 
-!!$  COMPLEX h_so(0:2*nb-1, 0:2*nb-1)
 !!$  REAL prfld_pert
 !!$  REAL h_pert_amp(1:3)
 !!$  REAL h_pert(0:nb-1,1:3)
@@ -71,6 +68,8 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
      open(unit=15, file=hk_file, status='old')
      read(5,*) hu_file
      open(unit=25, file=hu_file, status='old')
+     read(5,*) hso_file
+     open(unit=35, file=hso_file, status='old')
      read(5,*)
      read(5,*)
      read(5,*) Nl(1), Nl(2), Nl(3)
@@ -228,37 +227,6 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
 !!$#endif
 !!$
 
-!!$
-!!$
-!!$  if (rank .eq. 0) then
-!!$     read(5,*)
-!!$     read(5,*)
-!!$     read(5,*)
-!!$     read(5,*) so_flag, so_amp
-!!$     write(6,*)
-!!$     write(6,*) 'so_flag = ', so_flag
-!!$     write(6,*) 'so_amp = ', so_amp
-!!$     if (so_flag) then
-!!$        read(5,*)
-!!$        write(6,*) 'nus   nusp  so_matrix'
-!!$        do ibs = 0, 2*nb-1
-!!$           do ibsp = 0, 2*nb-1
-!!$              read(5,*) id, idp, h_so(ibs,ibsp)
-!!$              write(6,300) ibs, ibsp, real(h_so(ibs,ibsp)), imag(h_so(ibs,ibsp))
-!!$           enddo
-!!$        enddo
-!!$        h_so = so_amp*h_so
-!!$     else
-!!$        h_so = cmplx(0.0d0, 0.0d0)
-!!$     endif
-!!$  endif
-!!$
-!!$#ifdef USE_MPI
-!!$  call MPI_Bcast(h_so,4*nb*nb, MPI_COMPLEX, 0, MPI_COMM_WORLD, ierr)
-!!$#endif
-!!$
-!!$200 format('------------------- [',i3,',',i3,',',i3,'] hopping', &
-!!$         '------------------------')
 300 format(i3,',',i3,'  ','(',D16.9,',',D16.9,')')
 
   return

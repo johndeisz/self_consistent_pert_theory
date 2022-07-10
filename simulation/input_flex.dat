@@ -1,6 +1,7 @@
 ------  Files with lattice and tight-binding parameters
 "hk_file.dat"      ! Lattice information, hopping parameters + on-site energies
 "hu_file.dat"           ! Interaction parameters
+"hso.dat"     ! Spin-orbit matrices
 
 ------------Define the lattice ------------
 64 64 1             ! N_1, N_2, N_3: number of primitive translations in periodic lattice
@@ -15,12 +16,9 @@
 .true. "sig_output"                               ! output
 10                        ! Maximum pade order for output sigma
 
-----------FEA parameters ------------------------------------------------
+----------FLEX parameters ------------------------------------------------
 1.0d-08 500             ! tolerance in sigma, maximum iterations   
 0.3d0  1       ! alpha, (0 constant, 1 using Sig_HF, 2 using Sig_e0)
-
-------  Files with tight-binding parameters
-"hso.dat"     ! Spin-orbit matrices
 
 -------- Field configuration --------------------------
 0.0d0 0.0d0 0.0d0             ! atom 0, band 0 field: hx, hy, hz (Tesla)

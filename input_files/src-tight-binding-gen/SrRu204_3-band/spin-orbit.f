@@ -98,10 +98,12 @@ c Compute the spin-orbit matrix elements
             enddo
           enddo
             
-          write(6,*) nus1, nus2, sum
+          write(6,100) nus1, nus2, dreal(sum), dimag(sum)
 
         enddo
       enddo
+
+ 100  format(i3,'  ', i3, '    ', d16.9, '  ', d16.9)
 
       stop
       end

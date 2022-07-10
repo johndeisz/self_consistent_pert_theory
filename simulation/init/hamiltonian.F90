@@ -1,7 +1,7 @@
 MODULE Hamiltonian
   USE CONSTANTS 
 
-  character*128 :: hk_file, hu_file
+  character*128 :: hk_file, hu_file, hso_file
   integer :: N_dim
   double precision :: a(3,3)
   
@@ -16,6 +16,9 @@ MODULE Hamiltonian
 
   double precision, dimension(:,:,:), allocatable :: uup, uuj
   integer, parameter :: max_orbitals_per_atom = 5
+
+  double complex, dimension(:,:,:), allocatable :: h_so
+
   
 CONTAINS	
   subroutine read_hamiltonian()
@@ -117,7 +120,6 @@ CONTAINS
         i1 = mod(i1+Nl(1),Nl(1))
         i2 = mod(i2+Nl(2),Nl(2))
         i3 = mod(i3+Nl(3),Nl(3))
-        write(6,*) 'i1 = ', i1, ' i2 = ', i2, ' i3=', i3
         do jb = 1, nb*nb
            read(15,*) ib, ibp, re_tij, im_tij
            tij_temp(ib, ibp) = dcmplx(re_tij, im_tij)
@@ -187,6 +189,41 @@ CONTAINS
 
   if (rank .eq. 0) then
      close(unit =25)
+  endif
+
+  allocate( h_so(0:N_a-1, 0:2*max_orbitals_per_atom-1, &
+       0:2*max_orbitals_per_atom-1) )
+  
+  if (rank .eq. 0) then
+     read(35,*)
+  endif
+  
+  do i_a = 0, N_a-1
+     h_so_tmp = dcmplx(0.0d0, 0.0d0)
+     
+     if (rank .eq. 0) then
+        read(35,*) so_flag, so_amp
+     endif
+     call MPI_Bcast(so_flag, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
+     call MPI_Bcast(so_amp, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+
+     if (so_flag) then
+        if (rank .eq. 0) then
+           read(35,*) N_o_tmp
+           do i_dummy_1 = 1, N_o_tmp*N_o_tmp
+              read(35,*) is, isp, re_hso, im_hso
+              h_so_tmp(is,isp) = dcmplx(re_hso, im_sho)
+           enddo
+        endif
+        msize = (2*max_orbitals_atom)*(2*max_orbitals_atom)
+        call MPI_Bcast(h_so_tmp, 1, msize, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
+        h_so_tmp = so_amp * h_so_tmp
+     endif
+     h_so(i_a, :, :) = h_so_tmp
+  enddo
+     
+  if (rank .eq. 0) then
+     close(unit=35)
   endif
 
   end subroutine read_hamiltonian
