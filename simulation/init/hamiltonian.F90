@@ -28,11 +28,13 @@ CONTAINS
     include 'mpif.h'
     INTEGER :: rank, ierr
     INTEGER :: i_a, i_dummy_1, i_dummy_2, i1, i2, i3, jb, n_points, ip, ibp
-    INTEGER :: nb, i_o, ib, ind, N_o_int, m_size
-    double precision :: im_tij, re_tij, uuij, ujij
+    INTEGER :: is, isp
+    INTEGER :: nb, i_o, ib, ind, N_o_int, m_size, N_o_tmp
+    double precision :: im_tij, re_tij, uuij, ujij, re_hso, im_hso, so_amp
     double precision, dimension(0:max_orbitals_per_atom-1, &
          0:max_orbitals_per_atom-1) :: uu_temp, uj_temp
-    LOGICAL :: i_terminate
+    LOGICAL :: i_terminate, so_flag
+    double complex, dimension(:,:), allocatable :: h_so_tmp
     
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
 
@@ -191,6 +193,7 @@ CONTAINS
      close(unit =25)
   endif
 
+  allocate( h_so_tmp(0:2*max_orbitals_per_atom-1, 0:2*max_orbitals_per_atom-1))
   allocate( h_so(0:N_a-1, 0:2*max_orbitals_per_atom-1, &
        0:2*max_orbitals_per_atom-1) )
   
@@ -203,6 +206,7 @@ CONTAINS
      
      if (rank .eq. 0) then
         read(35,*) so_flag, so_amp
+        write(6,*) 'so_amp = ', so_amp
      endif
      call MPI_Bcast(so_flag, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
      call MPI_Bcast(so_amp, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
@@ -210,13 +214,16 @@ CONTAINS
      if (so_flag) then
         if (rank .eq. 0) then
            read(35,*) N_o_tmp
-           do i_dummy_1 = 1, N_o_tmp*N_o_tmp
+           write(6,*) 'N_o_tmp = ', N_o_tmp 
+           do i_dummy_1 = 1, 2*N_o_tmp*2*N_o_tmp
               read(35,*) is, isp, re_hso, im_hso
-              h_so_tmp(is,isp) = dcmplx(re_hso, im_sho)
+              h_so_tmp(is,isp) = dcmplx(re_hso, im_hso)
+              write(6,*) 'is = ', is, ' isp = ', isp
+              write(6,*) 're_hso = ', re_hso, ' im_hso = ', im_hso
            enddo
         endif
-        msize = (2*max_orbitals_atom)*(2*max_orbitals_atom)
-        call MPI_Bcast(h_so_tmp, 1, msize, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
+        m_size = (2*max_orbitals_per_atom)*(2*max_orbitals_per_atom)
+        call MPI_Bcast(h_so_tmp, m_size, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
         h_so_tmp = so_amp * h_so_tmp
      endif
      h_so(i_a, :, :) = h_so_tmp
