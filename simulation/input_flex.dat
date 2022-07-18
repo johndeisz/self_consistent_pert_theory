@@ -2,11 +2,12 @@
 "hk_file.dat"      ! Lattice information, hopping parameters + on-site energies
 "hu_file.dat"           ! Interaction parameters
 "hso.dat"     ! Spin-orbit matrices
+"h_field.dat"  ! Magnetic and pairing fields file
 
 ------------Define the lattice ------------
 64 64 1             ! N_1, N_2, N_3: number of primitive translations in periodic lattice
 
-------------Basic thermodynamic parameters -----------------------
+------------Thermodynamic variables -----------------------
 100.0d0            ! temperature (K) 
 4.0d0   1.0d-8    ! electron density, tolerance
 -1.5d+00   ! guess for unrenormalized chemical potential (eV)
@@ -19,15 +20,6 @@
 ----------FLEX parameters ------------------------------------------------
 1.0d-08 500             ! tolerance in sigma, maximum iterations   
 0.3d0  1       ! alpha, (0 constant, 1 using Sig_HF, 2 using Sig_e0)
-
--------- Field configuration --------------------------
-0.0d0 0.0d0 0.0d0             ! atom 0, band 0 field: hx, hy, hz (Tesla)
-0.0d0 0.0d0 0.0d0             ! atom 0, band 1 field: hx, hy, hz (Tesla)
-0.0d0 0.0d0 0.0d0             ! atom 0, band 2 field: hx, hy, hz (Tesla)
-0.00d0              ! external pair field strength - iterate to strongest pair channel 
- 
--------------------- Interaction parameters  ------------------------------
-0.0d0 0.0d0 0.0d0 ! U (uu), U' (up), J (uj) (eV)
 
 -- Perturbations: applied and relaxed over initial 10 iterations ---
 0.0d0       ! Pair field, start random, evolve to strongest channel

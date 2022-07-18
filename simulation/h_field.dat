@@ -1,0 +1,6 @@
+-------- External pair field configuration --------------------------
+0.00d0              ! external pair field strength - iterate to strongest pair channel 
+-------- Magnetic field configuration --------------------------
+0.1d0 0.0d0 0.0d0             ! orbital 0, band 0 field: hx, hy, hz (Tesla)
+0.0d0 0.2d0 0.0d0             ! orbital 1, band 1 field: hx, hy, hz (Tesla)
+0.0d0 0.0d0 0.3d0             ! orbital 2 field: hx, hy, hz (Tesla)

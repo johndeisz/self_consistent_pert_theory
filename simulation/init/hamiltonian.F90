@@ -1,7 +1,7 @@
 MODULE Hamiltonian
   USE CONSTANTS 
 
-  character*128 :: hk_file, hu_file, hso_file
+  character*128 :: hk_file, hu_file, hso_file, hfield_file
   integer :: N_dim
   double precision :: a(3,3)
   
@@ -19,6 +19,10 @@ MODULE Hamiltonian
 
   double complex, dimension(:,:,:), allocatable :: h_so
 
+  double precision :: prfld
+
+  double precision, dimension(:,:), allocatable :: h
+  double precision :: h_temp(1:3)
   
 CONTAINS	
   subroutine read_hamiltonian()
@@ -233,6 +237,28 @@ CONTAINS
      close(unit=35)
   endif
 
+  if (rank .eq. 0) then
+     read(45,*)
+     read(45,*) prfld
+     read(45,*)
+     write(6,*) 'nb = ', nb
+     write(6,*)
+  endif
+
+  call MPI_Bcast(prfld, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  write(6,*) 'rank = ', rank, ' nb = ', nb
+  
+  allocate ( h(0:2, 3) )
+
+  do i_a = 0, nb-1
+     if (rank .eq. 0) then
+        read(45,*) h_temp(1), h_temp(2), h_temp(3)
+        write(6,*) h_temp(1), ' ', h_temp(2), ' ', h_temp(3)
+     endif
+     call MPI_Bcast(h_temp, 3, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    h(i_a,:) = h_temp
+  enddo
+  
   end subroutine read_hamiltonian
 
 end MODULE Hamiltonian

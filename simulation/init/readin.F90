@@ -27,10 +27,6 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
   double precision :: sigma_tol, alpha
   INTEGER :: alpha_scheme, max_it
   
-!!$  REAL prfld
-!!$  REAL h(0:nb-1,1:3)
-!!$
-
 !!$  REAL prfld_pert
 !!$  REAL h_pert_amp(1:3)
 !!$  REAL h_pert(0:nb-1,1:3)
@@ -70,6 +66,8 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
      open(unit=25, file=hu_file, status='old')
      read(5,*) hso_file
      open(unit=35, file=hso_file, status='old')
+     read(5,*) hfield_file
+     open(unit=45, file=hfield_file, status='old')
      read(5,*)
      read(5,*)
      read(5,*) Nl(1), Nl(2), Nl(3)
@@ -179,17 +177,6 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
   call MPI_Bcast(alpha, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
   call MPI_Bcast(alpha_scheme, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
   
-!!$     read(5,*) prfld
-!!$     do ib = 0, nb - 1
-!!$        read(5,*) h(ib,:)
-!!$     enddo  
-!!$     
-!!$     write(6,*) "external pairing field = ", prfld
-!!$     write(6,*) "Band-dependent magnetic fields (Tesla)"
-!!$     do ib = 0, nb-1
-!!$        write(6,*) h(ib,:)
-!!$     enddo
-
 !!$ call MPI_Bcast(prfld, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
 !!$  call MPI_Bcast(h, 3*nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
   
