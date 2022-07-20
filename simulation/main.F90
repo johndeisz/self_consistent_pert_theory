@@ -22,10 +22,6 @@ program multiband_flex_dca
   ! Put temperature in eV
   t = kb*t
 
-! call readin(t, flux, prfld, h, target_density, density_tol, mu, uu,
-! up, uj, ed, tij, prfld_pert, h_pert, v_pert, h_so,,)
-
-
   ! Multiply H by mu_B to get eV
 ! h = mub*h
 ! h_pert = mub*h_pert 

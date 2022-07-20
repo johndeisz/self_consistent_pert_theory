@@ -39,6 +39,7 @@ MODULE Constants
 ! integer, parameter :: ncp1 = ncp - 1
 
   ! Mathematical and physical constants
+  double precision, parameter :: pi = 4.0d0*atan(1.0d0)
   double precision, parameter :: kb = 8.61734315d-05  ! eV/K
   double precision, parameter :: mub = 5.788381755d-5 ! eV/T
   double precision, parameter :: gs = 2.002319

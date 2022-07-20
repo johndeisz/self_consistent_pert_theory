@@ -5,15 +5,8 @@ Real start_time, end_time
 Real last_it_time, this_it_time
 
 ! Parameters read from input file
-! REAL flux(1:3)
-! REAL prfld
-! REAL h(0:nb-1,1:3)
 double precision :: target_density, density_tol, mu
-! REAL uu, up, uj
 
-! REAL ed(0:nb-1)
-! COMPLEX tij(0:nb-1,0:nb-1,-2:2,-2:2,-2:2)
-! COMPLEX h_so(0:2*nb-1, 0:2*nb-1)
 ! COMPLEX Lvec(1:3,0:nb-1, 0:nb-1)
 ! COMPLEX Lorb(1:3)
 

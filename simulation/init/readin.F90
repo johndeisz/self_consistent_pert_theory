@@ -1,10 +1,6 @@
-#include "../convert.F90"
-
 subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file, &
      write_output, sigma_output_file, max_pade_order, &
      sigma_tol, max_it, alpha, alpha_scheme )
-!!$subroutine readin(prfld, h, &
-!!$      prfld_pert, h_pert, v_pert, h_so ) 
 
   USE CONSTANTS
   USE hamiltonian
@@ -16,7 +12,7 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
   double precision test_nl
 
   integer :: il, i_a, i_b, ib
-  integer :: i_o, i_dummy_1, i_dummy_2, nb, ind
+  integer :: i_o, i_dummy_1, i_dummy_2, ind
   
 ! Parameters to be read and returned
   double precision :: target_density, density_tol, mu
@@ -26,48 +22,22 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
 
   double precision :: sigma_tol, alpha
   INTEGER :: alpha_scheme, max_it
-  
-!!$  REAL prfld_pert
-!!$  REAL h_pert_amp(1:3)
-!!$  REAL h_pert(0:nb-1,1:3)
-!!$  REAL v_pert_amp
-!!$  REAL v_pert(0:nb-1)
 
-
-!!$
-!!$  REAL pi
-!!$
+  double precision :: h_pert_amp(1:3)
+  double precision :: v_pert_amp
   ! MPI variables
   INTEGER rank
   INTEGER ierr
-!!$
-!!$  !     other variable
   INTEGER icode
-!!$  INTEGER i
-!!$  REAL tmp_hop(1:5)
-!!$
-!!$  INTEGER ib, ibp, id, idp
-!!$  INTEGER ix, iy, iz, k
-!!$  INTEGER max_x, max_y, max_z
-!!$
-!!$  INTEGER ibs, ibsp
-!!$  LOGICAL so_flag
-!!$  REAL so_amp
-!!$  REAL delta_strain
-!!$  INTEGER ig
-!!$
+
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
 
   if (rank .eq. 0) then
      read(5,*) 
      read(5,*) hk_file
-     open(unit=15, file=hk_file, status='old')
      read(5,*) hu_file
-     open(unit=25, file=hu_file, status='old')
      read(5,*) hso_file
-     open(unit=35, file=hso_file, status='old')
      read(5,*) hfield_file
-     open(unit=45, file=hfield_file, status='old')
      read(5,*)
      read(5,*)
      read(5,*) Nl(1), Nl(2), Nl(3)
@@ -150,9 +120,9 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
      write(6,*) "Sigma output file = ", sigma_output_file
      write(6,*) "Maximum pade order for output sigma = ", max_pade_order    
   endif
-
+  
   call MPI_Bcast(read_input, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
-  call MPI_Bcast(write_output, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(write_output, 1, MPI_LOGICAL, 0, MPI_COMM_WORLD, ierr)
   call MPI_Bcast(max_pade_order, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
 
@@ -177,42 +147,38 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
   call MPI_Bcast(alpha, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
   call MPI_Bcast(alpha_scheme, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
   
-!!$ call MPI_Bcast(prfld, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(h, 3*nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(prfld, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(h, 3*nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
   
-!!$  pi = acos(-1.0d0)
-!!$  
- 
-!!$
-!!$  !-----Perturbations: applied and relaxed over initial 10 iterations -------
-!!$
-!!$  if (rank .eq. 0) then
-!!$     read(5,*)
-!!$     read(5,*)
-!!$     read(5,*) prfld_pert
-!!$     read(5,*) h_pert_amp
-!!$     read(5,*) v_pert_amp
-!!$
-!!$     write(6,*) "Preturbations: applied and relaxed over initial 10 iterations"
-!!$     write(6,*) "Artificial pair field = ", prfld_pert
-!!$     write(6,*) "Random orb.-dependent mag. field amp (T) ", h_pert_amp
-!!$     do ib = 0, nb-1
-!!$        h_pert(ib,1) = h_pert_amp(1) * (rand()-0.5d0)
-!!$        h_pert(ib,2) = h_pert_amp(2) * (rand()-0.5d0)
-!!$        h_pert(ib,3) = h_pert_amp(3) * (rand()-0.5d0)
-!!$     enddo
-!!$     write(6,*) "Random orbital potential amplitude  = ", v_pert_amp
-!!$     do ib = 0, nb-1
-!!$        v_pert(ib) = v_pert_amp * (rand() - 0.5d0)
-!!$     enddo
-!!$  endif
-!!$
-!!$#ifdef USE_MPI
-!!$  call MPI_Bcast(prfld_pert, 1, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(h_pert, 3*nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$  call MPI_Bcast(v_pert, nb, MPI_REAL, 0, MPI_COMM_WORLD, ierr)
-!!$#endif
-!!$
+  !-----Perturbations: applied and relaxed over initial 10 iterations -------
+
+  allocate ( h_pert(0:nb-1,3) )
+  allocate ( v_pert(0:nb-1) )
+  
+  if (rank .eq. 0) then
+     read(5,*)
+     read(5,*)
+     read(5,*) prfld_pert
+     read(5,*) h_pert_amp
+     read(5,*) v_pert_amp
+
+     write(6,*) "Preturbations: applied and relaxed over initial 10 iterations"
+     write(6,*) "Artificial pair field = ", prfld_pert
+     write(6,*) "Random orb.-dependent mag. field amp (T) ", h_pert_amp
+     do ib = 0, nb-1
+        h_pert(ib,1) = h_pert_amp(1) * (rand()-0.5d0)
+        h_pert(ib,2) = h_pert_amp(2) * (rand()-0.5d0)
+        h_pert(ib,3) = h_pert_amp(3) * (rand()-0.5d0)
+     enddo
+     write(6,*) "Random orbital potential amplitude  = ", v_pert_amp
+     do ib = 0, nb-1
+        v_pert(ib) = v_pert_amp * (rand() - 0.5d0)
+     enddo
+  endif
+
+  call MPI_Bcast(prfld_pert, 1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(h_pert, 3*nb, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(v_pert, nb, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
 
 300 format(i3,',',i3,'  ','(',D16.9,',',D16.9,')')
 
