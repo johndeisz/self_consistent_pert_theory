@@ -1,5 +1,3 @@
-#include "convert.F90"
-
 program multiband_flex_dca
 
   USE CONSTANTS
@@ -23,15 +21,15 @@ program multiband_flex_dca
   t = kb*t
 
   ! Multiply H by mu_B to get eV
-! h = mub*h
-! h_pert = mub*h_pert 
+  h = mub*h
+  h_pert = mub*h_pert 
 
   !     Bare bandstructure and vertex
 ! ek_min = ek_minimum(tij, ed)
 ! if (rank .eq. 0) then
 ! write(6,*) "ek_min = ", ek_min
 ! endif
-! call gamma0_define(rank, gamma0_ph, uu, up, uj)
+  call gamma0_define()
 
 #ifdef SECOND_ORDER
   !     generate the tau and epsilon matrices

@@ -1,5 +1,4 @@
--------------------- Interaction parameters  ------------------------------
-1   ! Number of atoms with interactions
+----Interaction parameters  (number of int. atoms and orbitals must agree with hk_file ----------------
 3
 0 0  2.72d0  0.0d0  ! orbital_a, orbital_b, U, J 
 1 1  2.72d0  0.0d0  

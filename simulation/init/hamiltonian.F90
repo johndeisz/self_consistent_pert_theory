@@ -14,7 +14,8 @@ MODULE Hamiltonian
   double complex, dimension(:,:,:,:,:), allocatable :: tij
 
   double precision, dimension(:,:,:), allocatable :: uup, uuj
-  integer, parameter :: max_orbitals_per_atom = 5
+  double complex, dimension(:,:,:), allocatable :: gamma0_ph
+  integer :: max_orb_per_atom, max_orb_per_int_atom
 
   double complex, dimension(:,:,:), allocatable :: h_so
 
@@ -38,9 +39,8 @@ CONTAINS
     INTEGER :: is, isp
     INTEGER :: i_o, ib, ind, N_o_int, m_size, N_o_tmp
     double precision :: im_tij, re_tij, uuij, ujij, re_hso, im_hso, so_amp
-    double precision, dimension(0:max_orbitals_per_atom-1, &
-         0:max_orbitals_per_atom-1) :: uu_temp, uj_temp
-    LOGICAL :: i_terminate, so_flag
+    double precision, dimension(:,:), allocatable :: uu_temp, uj_temp
+    LOGICAL :: i_terminate, int_flag, so_flag
     double complex, dimension(:,:), allocatable :: h_so_tmp
     double precision :: h_temp(1:3)
     double complex, dimension(:,:), allocatable :: tij_temp
@@ -66,31 +66,52 @@ CONTAINS
     endif
      	
     call MPI_Bcast(N_a, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    allocate (r_atom(N_a,3))
+    allocate (r_atom(0:N_a-1,3))
 
     if (rank .eq. 0) then
        write(6,*) 'N_a upon read = ', N_a
-       do i_a = 1, N_a
+       do i_a = 0, N_a-1
           read(15,*) r_atom(i_a, 1), r_atom(i_a, 2), r_atom(i_a, 3)
        enddo
     endif
  
     call MPI_Bcast(r_atom, N_a*3, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
   
-    allocate (N_o(N_a))
+    allocate (N_o(0:N_a-1))
 
     if (rank .eq. 0) then  
        read(15,*)
        read(15,*)
        nb = 0
-       do i_a = 1, N_a
-          read(15,*) N_o(i_a)
+       N_int_a = 0
+       max_orb_per_atom = 0
+       max_orb_per_int_atom = 0
+       do i_a = 0, N_a-1
+          read(15,*) int_flag, N_o(i_a)
           write(6,*) 'N_o(i_a) = ', N_o(i_a)
+          if (int_flag) then
+             N_int_a = N_int_a + 1
+             if (N_o(i_a) .gt. max_orb_per_int_atom) then
+                max_orb_per_int_atom = N_o(i_a)
+             endif
+          endif
+          if (N_o(i_a) .gt. max_orb_per_atom) then
+             max_orb_per_atom = N_o(i_a)
+          endif
           nb = nb + N_o(i_a)
        enddo
+       write(6,*) 'N_int_a = ', N_int_a
+       write(6,*) 'nb = ', nb
+       write(6,*) 'max_orb_per_int_atom = ', max_orb_per_int_atom
+       write(6,*) 'max_orb_per_atom = ', max_orb_per_atom
     endif
+    
     call MPI_Bcast(nb, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
     call MPI_Bcast(N_o, N_a, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    call MPI_Bcast(N_int_a, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    call MPI_Bcast(max_orb_per_atom, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    call MPI_Bcast(max_orb_per_int_atom, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+
     allocate (ed(0:nb-1))
      	
     if (rank .eq. 0) then
@@ -101,8 +122,8 @@ CONTAINS
        enddo
        write(6,*) 'orbital energies '
        ind = 0
-       do i_a = 1, N_a
-          do i_o = 1, N_o(i_a)
+       do i_a = 0, N_a-1
+          do i_o = 0,  N_o(i_a)-1
              write(6,*) i_a, i_o, ed(ind)
              ind = ind + 1
           enddo
@@ -121,6 +142,7 @@ CONTAINS
      read(15,*)
      read(15,*) n_points
   endif
+  
   call MPI_Bcast(n_points, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
   
@@ -148,25 +170,30 @@ CONTAINS
 
   !----------------------Interaction Parameters ------------------------
 
+  allocate (uu_temp(0:max_orb_per_int_atom-1,0:max_orb_per_int_atom-1))
+  allocate (uj_temp(0:max_orb_per_int_atom-1,0:max_orb_per_int_atom-1))
+  
   if (rank .eq. 0) then
      open(unit=25, file=hu_file, status='old')
      read(25,*)
-     read(25,*) N_int_a   ! Number of atoms with interactions
   endif
-  call MPI_Bcast(N_int_a, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-  allocate (uup(0:N_int_a-1, 0:max_orbitals_per_atom-1, 0:max_orbitals_per_atom-1))
-  allocate (uuj(0:N_int_a-1, 0:max_orbitals_per_atom-1, 0:max_orbitals_per_atom-1))
+  
+  allocate (uup(0:N_int_a-1, 0:max_orb_per_int_atom-1, 0:max_orb_per_int_atom-1))
+  allocate (uuj(0:N_int_a-1, 0:max_orb_per_int_atom-1, 0:max_orb_per_int_atom-1))
 
   uup = 0.0d0
   uuj = 0.0d0
   
   do i_a = 0, N_int_a-1
+     uu_temp = 0.0d0
+     uj_temp = 0.0d0
      i_terminate = .false.
+     
      if (rank .eq. 0) then
 
         read(25,*) N_o_int
-        if ( (N_o_int .ne. N_o(i_a+1)) .or.  &
-             (N_o_int .gt. max_orbitals_per_atom) ) then
+        if ( (N_o_int .ne. N_o(i_a)) ) then
+           write(6,*) 'mismatch in orbital information in hk_file and hu_file'
            i_terminate = .true.
         endif
 
@@ -187,10 +214,10 @@ CONTAINS
         enddo
      endif
 
-     m_size = max_orbitals_per_atom * max_orbitals_per_atom
+     m_size = max_orb_per_int_atom * max_orb_per_int_atom
      call MPI_Bcast(uu_temp, m_size, MPI_DOUBLE_PRECISION, &
           0, MPI_COMM_WORLD, ierr)
-     call MPI_Bcast(uj_temp, max_orbitals_per_atom**2, MPI_DOUBLE_PRECISION, &
+     call MPI_Bcast(uj_temp, m_size, MPI_DOUBLE_PRECISION, &
           0, MPI_COMM_WORLD, ierr)
 
      uup(i_a,:,:) = uu_temp
@@ -202,9 +229,8 @@ CONTAINS
      close(unit =25)
   endif
 
-  allocate( h_so_tmp(0:2*max_orbitals_per_atom-1, 0:2*max_orbitals_per_atom-1))
-  allocate( h_so(0:N_a-1, 0:2*max_orbitals_per_atom-1, &
-       0:2*max_orbitals_per_atom-1) )
+  allocate( h_so_tmp(0:2*max_orb_per_atom-1, 0:2*max_orb_per_atom-1))
+  allocate( h_so(0:N_a-1, 0:2*max_orb_per_atom-1, 0:2*max_orb_per_atom-1) )
   
   if (rank .eq. 0) then
      open(unit=35, file=hso_file, status='old')
@@ -230,7 +256,7 @@ CONTAINS
               h_so_tmp(is,isp) = dcmplx(re_hso, im_hso)
            enddo
         endif
-        m_size = (2*max_orbitals_per_atom)*(2*max_orbitals_per_atom)
+        m_size = (2*max_orb_per_atom)*(2*max_orb_per_atom)
         call MPI_Bcast(h_so_tmp, m_size, MPI_DOUBLE_COMPLEX, 0, MPI_COMM_WORLD, ierr)
         h_so_tmp = so_amp * h_so_tmp
      endif

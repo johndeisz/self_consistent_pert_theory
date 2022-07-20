@@ -9,14 +9,14 @@ OBJECTS_COMMON = \
 	hamiltonian.o \
 	main.o \
 	init_environ.o \
-	readin.o 
+	readin.o \
+	gamma0_define.o 
 #	bare_dispersion.o \
 #	h0.o \
 #	fft_3D_lattice.o \
 #	init_sigma1.o \
 #	init_pair_wave.o \
 #	psi_transform.o \
-#	gamma0_define.o \
 #	effective_field.o \
 #	calc_g_tau0.o \
 #	sigma_first.o \

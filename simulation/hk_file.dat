@@ -5,18 +5,18 @@
 0.0d0 0.0d0 0.0d0   !  a_3,x a_3,y a_3,z components of 3rd prim. vector (ignored if dim<3)
 
 -------- Define the atom locations w/ number of orbits per atom
-1    ! Number of unique atomic sites
+1    ! Number of unique atoms
 0.3d0 0.2d0 0.0d0   ! Atomic location within the primitive cell for atom 0
 
----------------Number of orbitals per atom information ---------
-3  !  Orbitals for atom 1
+----- Atomic orbital information: ATOMS with interactions go first, non-interacting atoms follow ---------
+.true. 3  !  Interaction flag for atom 0, number of orbitals for atom 0
 
- --------------orbital level-------------
+ --------------orbital level: First index = atom #, second index is orbital # for that atom -------------
  0  0 -0.36463270816880000     
  0  1 -0.36463270816880000     
  0  2 -0.34299964824386003     
 
-  -----  Hopping matrix ------ 
+  -----  Hopping matrix: Use composite orbital indices.  ------ 
  25      ! Number of points in hopping matrix 
  -2   -2   0
   0    0    0.000000000D+00 0.000000000D+00
