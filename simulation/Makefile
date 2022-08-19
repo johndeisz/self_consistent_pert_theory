@@ -45,7 +45,7 @@ OBJECTS_COMMON = \
 
 
 OBJECTS_SECOND = \
-#	generate_tau_eps_omega.o \
+	tau_epsilon_omega.o 
 #	analytic_functions.o \
 #	a_integrals.o \
 #	discontinuities.o \
@@ -79,7 +79,7 @@ OBJECTS_THIRD = \
 flex : defines = -DSECOND_ORDER -DTHIRD_ORDER -DFLEX  
 flex : CC=$(MPICC)
 flex : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-flex : $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
+flex : $(OBJECTS_SECOND) $(OBJECTS_COMMON) $(OBJECTS_THIRD)
 	$(CC) -o flex $(OBJECTS) $(LIBRARIES)
 
 3rd-order : defines = -DSECOND_ORDER -DTHIRD_ORDER  
@@ -120,8 +120,8 @@ bare_dispersion.o : init/bare_dispersion.F90 constants.F90
 fft_3D_lattice.o : ffts/fft_3D_lattice.F90 constants.F90
 	$(CC) -c ffts/fft_3D_lattice.F90 $(defines)
 
-generate_tau_eps_omega.o : init/generate_tau_eps_omega.F90 constants.F90
-	$(CC) -c init/generate_tau_eps_omega.F90 $(defines)
+tau_epsilon_omega.o : init/tau_epsilon_omega.F90 constants.F90
+	$(CC) -c init/tau_epsilon_omega.F90 $(defines)
 
 analytic_functions.o : init/analytic_functions.F90 constants.F90
 	$(CC) -c init/analytic_functions.F90 $(defines)

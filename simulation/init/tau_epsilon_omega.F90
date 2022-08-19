@@ -1,22 +1,22 @@
 MODULE tau_epsilon_omega
-  USE constants
+  USE CONSTANTS
   double precision, dimension(:), allocatable :: tau, epsilon, omega
 
 CONTAINS
-subroutine generate_tau_eps_omega(t)
+subroutine generate_tau_eps_omega()
 
   USE CONSTANTS
   IMPLICIT NONE
 
   include 'mpif.h'
 
-  double precision t
-  INTEGER rank, ierr
+  INTEGER rank, np, ierr
 
   double precision delta_tau
   INTEGER l
 
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+  call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ierr)
 
   delta_tau = (1.d0 / t ) / float(m)
   allocate (tau(0:mp1))

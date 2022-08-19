@@ -2,6 +2,7 @@ program multiband_flex_dca
 
   USE CONSTANTS
   USE hamiltonian
+  USE tau_epsilon_omega
  ! USE bare_dispersion
 
   IMPLICIT NONE
@@ -32,8 +33,7 @@ program multiband_flex_dca
   call gamma0_define()
 
 #ifdef SECOND_ORDER
-  !     generate the tau and epsilon matrices
-! call generate_tau_eps_omega(t, tau, epsilon, omega)
+  call generate_tau_eps_omega() 
   !     Create the analytic functions
 ! call analytic_functions(t, tau, epsilon, omega, x, y, q_tau,
   ! q_mtau, q_epsilon, r_tau, r_omega)

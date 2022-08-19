@@ -28,11 +28,6 @@ double precision :: target_density, density_tol, mu
 ! REAL ek_min
 ! COMPLEX gamma0_ph(0:16*nb*nb-1, 0:16*nb*nb-1)
 
-  ! Time and frequency arrays
-#ifdef SECOND_ORDER
-! REAL tau(0:mp1), epsilon(0:mp1), omega(0:mp1)
-#endif
-
   ! Variables, arrays for analytic functions
 #ifdef SECOND_ORDER
 ! REAL x(0:1,0:1), y(0:1,0:1)
