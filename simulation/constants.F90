@@ -5,7 +5,8 @@ MODULE Constants
   integer :: Nl(3)
   double precision :: t
 
-!#include "convert.F90" 
+  integer :: m, m1, mp, mp1
+
   
 ! integer, parameter :: nb=3 ! number of bands      
 
@@ -20,12 +21,9 @@ MODULE Constants
 ! integer, parameter :: nl = llx*lly*llz
 
   ! MPI related constants.
-! integer, parameter :: mp = m/np  ! must be an integer
 ! integer, parameter :: ncp = nc/np  ! must be an integer
 
   ! Convenience constants
-! integer, parameter :: mp1 = mp - 1
-! integer, parameter :: m1 = m - 1
 
 ! integer, parameter :: llx1 = llx - 1
 ! integer, parameter :: lly1 = lly - 1

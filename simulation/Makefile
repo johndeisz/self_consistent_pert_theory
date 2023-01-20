@@ -7,10 +7,10 @@ LIBRARIES= -lfftw3 -lblas -llapack
 OBJECTS_COMMON = \
 	constants.o \
 	hamiltonian.o \
-	main.o \
 	init_environ.o \
 	readin.o \
 	gamma0_define.o 
+# main.o \
 #	bare_dispersion.o \
 #	h0.o \
 #	fft_3D_lattice.o \
@@ -45,8 +45,8 @@ OBJECTS_COMMON = \
 
 
 OBJECTS_SECOND = \
-	tau_epsilon_omega.o 
-#	analytic_functions.o \
+	tau_epsilon_omega.o \
+	analytic_functions.o 
 #	a_integrals.o \
 #	discontinuities.o \
 #	fft_3D.o \
@@ -78,8 +78,8 @@ OBJECTS_THIRD = \
 
 flex : defines = -DSECOND_ORDER -DTHIRD_ORDER -DFLEX  
 flex : CC=$(MPICC)
-flex : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD)
-flex : $(OBJECTS_SECOND) $(OBJECTS_COMMON) $(OBJECTS_THIRD)
+flex : OBJECTS = $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD) main.o
+flex : $(OBJECTS_COMMON) $(OBJECTS_SECOND) $(OBJECTS_THIRD) main.o
 	$(CC) -o flex $(OBJECTS) $(LIBRARIES)
 
 3rd-order : defines = -DSECOND_ORDER -DTHIRD_ORDER  

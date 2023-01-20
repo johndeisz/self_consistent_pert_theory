@@ -4,8 +4,9 @@
 "hso.dat"     ! Spin-orbit matrices
 "h_field.dat"  ! Magnetic and pairing fields file
 
-------------Define the lattice ------------
+------------Lattice, cluster size and frequency/time points ------------
 64 64 1             ! N_1, N_2, N_3: number of primitive translations in periodic lattice
+8192                ! m: Number of frequency values / imaginary time points
 
 ------------Thermodynamic variables -----------------------
 100.0d0            ! temperature (K) 

@@ -1,19 +1,14 @@
-#include "../convert.F90"
-
-subroutine analytic_functions(t, tau, epsilon, omega, x, y, &
-     q_tau, q_mtau, q_epsilon, r_tau, r_omega)
-
+MODULE analytic_functions
   USE CONSTANTS
+  USE tau_epsilon_omega
+  double precision :: x(0:1,0:1), y(0:1,0:1)
+  double precision, dimension(:,:,:), allocatable :: q_tau, q_mtau, r_tau
+  double complex, dimension(:,:,:), allocatable :: q_epsilon
+  double complex, dimension(:,:,:), allocatable :: r_omega
+
+CONTAINS
+subroutine generate_analytic_functions()
   IMPLICIT NONE
-
-  REAL t
-  REAL tau(0:mp1), epsilon(0:mp1), omega(0:mp1)
-
-  REAL x(0:1,0:1), y(0:1,0:1)
-  COMPLEX q_epsilon(0:1,0:1,0:mp1), r_omega(0:1,0:1,0:mp1)
-  REAL q_tau(0:1,0:1,0:mp1), q_mtau(0:1,0:1,0:mp1)
-  REAL r_tau(0:1,0:1,0:mp1)
-
   INTEGER j, l
 
   !     Define the x and y arrays
@@ -25,6 +20,12 @@ subroutine analytic_functions(t, tau, epsilon, omega, x, y, &
   y(1,0) = 1.75d0
   x(1,1) = 3.0d0
   y(1,1) = 2.75d0
+
+  allocate(q_tau(0:1,0:1,0:mp1))
+  allocate(q_mtau(0:1,0:1,0:mp1))
+  allocate(r_tau(0:1,0:1,0:mp1))
+  allocate(q_epsilon(0:1,0:1,0:mp1))
+  allocate(r_omega(0:1,0:1,0:mp1))
 
   do l = 0, mp1
      do j = 0, 1
@@ -77,4 +78,5 @@ subroutine analytic_functions(t, tau, epsilon, omega, x, y, &
   enddo
 
   return
-end subroutine analytic_functions
+end subroutine generate_analytic_functions
+end MODULE

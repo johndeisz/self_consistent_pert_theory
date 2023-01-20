@@ -3,6 +3,7 @@ program multiband_flex_dca
   USE CONSTANTS
   USE hamiltonian
   USE tau_epsilon_omega
+  USE analytic_functions
  ! USE bare_dispersion
 
   IMPLICIT NONE
@@ -34,9 +35,7 @@ program multiband_flex_dca
 
 #ifdef SECOND_ORDER
   call generate_tau_eps_omega() 
-  !     Create the analytic functions
-! call analytic_functions(t, tau, epsilon, omega, x, y, q_tau,
-  ! q_mtau, q_epsilon, r_tau, r_omega)
+  call generate_analytic_functions()
 ! call a_integrals(t, x, y, epsilon, a_int)
 #endif
 

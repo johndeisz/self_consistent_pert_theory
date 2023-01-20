@@ -26,11 +26,12 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
   double precision :: h_pert_amp(1:3)
   double precision :: v_pert_amp
   ! MPI variables
-  INTEGER rank
+  INTEGER rank, np
   INTEGER ierr
   INTEGER icode
 
   call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+  call MPI_COMM_SIZE(MPI_COMM_WORLD, np, ierr)
 
   if (rank .eq. 0) then
      read(5,*) 
@@ -41,6 +42,7 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
      read(5,*)
      read(5,*)
      read(5,*) Nl(1), Nl(2), Nl(3)
+     read(5,*) m
   end if
 
   if (rank .eq. 0) then
@@ -53,8 +55,16 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
            flag_nl = .true.
         endif
      enddo
+     print *, 'm = ', m
+     test_nl = dlog(dfloat(m))/dlog(2.0d0)
+     test_nl = dmod(test_nl, 1.0d0)
+     print *, 'flag_nl = ', flag_nl
+     print *, 'test_nl = ', test_nl
+     if (abs(test_nl) .gt. abs(1.d0-6)) then
+             flag_nl = .true.
+     endif
      if (flag_nl) then
-        print *, 'Each lattice dimension must equal 2^n'
+        print *, 'Each lattice/time dimension must equal 2^n'
         print *, 'Stopping'
      endif
   endif
@@ -66,6 +76,10 @@ subroutine readin(target_density, density_tol, mu, read_input, sigma_input_file,
      stop
   endif
   call MPI_Bcast(Nl, 3, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  call MPI_Bcast(m, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+  m1 = m-1
+  mp = m / np
+  mp1 = mp - 1
 
   call read_hamiltonian()
 
