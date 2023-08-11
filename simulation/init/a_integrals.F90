@@ -1,27 +1,24 @@
-#include "../convert.F90"
-
-subroutine a_integrals( t, x, y, epsilon, a_int)
-
+MODULE a_integrals
   USE CONSTANTS
+  USE tau_epsilon_omega
+  USE analytic_functions
+  double complex, dimension(:,:,:,:,:), allocatable :: a_int
+
+CONTAINS
+subroutine generate_a_integrals
   IMPLICIT NONE
 
-  REAL t, x(0:1,0:1), y(0:1,0:1), epsilon(0:mp1)
-  COMPLEX a_int(0:1,0:1,0:1,0:1,0:mp1)
+  double precision a(0:1,0:1,0:1), b(0:1,0:1,0:1)
+  double precision fx, ex, nby, ey
+  INTEGER ia, ib, ja, jb, i, l
 
-  REAL a(0:1,0:1,0:1), b(0:1,0:1,0:1)
-
-  REAL fx, ex, nby, ey
-  INTEGER ia, ib, ja, jb
-
-  COMPLEX part1(0:mp1), part2(0:mp1)
-  COMPLEX part3(0:mp1), part4(0:mp1)
-
-  INTEGER i, l
+  double complex part1(0:mp1), part2(0:mp1), part3(0:mp1), part4(0:mp1)
 
   !     Define constants appearing in q and r functions.
 
-  do i = 0,1
-     
+  allocate(a_int(0:1,0:1,0:1,0:1,0:mp1))
+
+  do i = 0,1     
      a(0,0,i) = -0.5d0
      a(1,0,i) = -0.5d0
      a(0,1,i) = 0.5d0 / x(1,i)
@@ -31,9 +28,7 @@ subroutine a_integrals( t, x, y, epsilon, a_int)
      b(1,0,i) = -0.5d0
      b(0,1,i) = -0.5d0 / y(1,i)
      b(1,1,i) = 0.5d0 / y(1,i)
-
   enddo
-
 
   !     Evaluate the integrals for the Fourier transform of  Q(-tau) R(tau)
 
@@ -52,18 +47,18 @@ subroutine a_integrals( t, x, y, epsilon, a_int)
               do l = 0, mp1
 
                  part1(l) = (ex + ey) * a(0,ia,ib) * b(0,ja,jb) / & 
-                      ( cmplx( 0.0d0, epsilon(l) ) +  ( x(ia,ib) - y(ja,jb) ) )
-	      
+                      ( dcmplx( 0.0d0, epsilon(l) ) +  ( x(ia,ib) - y(ja,jb) ) )
+
                  part2(l) = (ex*ey + 1.0d0) * &
                       a(1,ia,ib) * b(0,ja,jb) / & 
-                      ( cmplx( 0.0d0, epsilon(l) ) + & 
+                      ( dcmplx( 0.0d0, epsilon(l) ) + & 
                       ( -x(ia,ib) - y(ja,jb) ) )
 
                  part3(l) = -( ex*ey + 1.0d0 ) * a(0,ia,ib) * b(1,ja,jb) / & 
-                      ( cmplx( 0.0d0,epsilon(l) ) + ( x(ia,ib) + y(ja,jb) ) )
+                      ( dcmplx( 0.0d0,epsilon(l) ) + ( x(ia,ib) + y(ja,jb) ) )
  
                  part4(l) = -(ex + ey) * a(1,ia,ib) * b(1,ja,jb) / & 
-                      ( cmplx( 0.0d0, epsilon(l) ) + ( -x(ia,ib) + y(ja,jb) ) )
+                      ( dcmplx( 0.0d0, epsilon(l) ) + ( -x(ia,ib) + y(ja,jb) ) )
 
                  a_int(ia,ib,ja,jb,l) = fx * nby * &
                       ( part1(l) +  part2(l) + part3(l) + part4(l) )
@@ -78,4 +73,5 @@ subroutine a_integrals( t, x, y, epsilon, a_int)
 
 
   return
-end subroutine a_integrals
+end subroutine generate_a_integrals
+end MODULE

@@ -46,8 +46,8 @@ OBJECTS_COMMON = \
 
 OBJECTS_SECOND = \
 	tau_epsilon_omega.o \
-	analytic_functions.o 
-#	a_integrals.o \
+	analytic_functions.o \
+	a_integrals.o 
 #	discontinuities.o \
 #	fft_3D.o \
 #	parameter_init.o \
